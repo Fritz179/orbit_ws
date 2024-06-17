@@ -43,7 +43,7 @@ options = {
   landmarks_sampling_ratio = 1.,
 }
 
-TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 2
+TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 5
 TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 1.5
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.translation_weight = 1.0

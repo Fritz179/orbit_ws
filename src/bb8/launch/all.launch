@@ -1,3 +1,5 @@
+<!-- roslaunch bb8 all.launch slam:=false -->
+
 <launch>
     <arg name="map_file" default="map.pbstream" doc="The .pbstream filename of the map to load. Assumed to be in the 'bb8/maps/' directory."/>
     <arg name="slam" default="true" doc="Start cartographer in SLAM localization mode. (false = pure localization)"/>
@@ -43,7 +45,8 @@
         <node name="cartographer_node_localization" pkg="cartographer_ros" type="cartographer_node" output="screen" unless="$(arg slam)"
             args="-configuration_directory $(find bb8)/config 
                   -configuration_basename ros_2d_navigation.lua
-                  -load_state_filename $(find bb8)/maps/$(arg map_file)">
+                  -load_state_filename $(find bb8)/maps/$(arg map_file)
+                  -load_frozen_state true">
 
             <remap from="/head/imu" to="/head/imu/data_raw"/>
         </node>
