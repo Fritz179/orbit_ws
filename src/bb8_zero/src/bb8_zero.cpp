@@ -125,11 +125,14 @@ void NodeZero::enable_head_callback(const std_msgs::Bool::ConstPtr& msg) {
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed = (int16_t)(msg->linear.x * 255.0 / 5.0);
 
-    if (msg->angular.z) {
-        m_heading = m_odom.pose.pose.orientation.z + msg->angular.z;
+    // if (msg->angular.z) {
+    //     m_heading = m_odom.pose.pose.orientation.z + msg->angular.z;
 
-        m_heading = std::fmod(m_heading + 1, 2) - 1; // Normalize to [-1, 1]
-    }
+    //     m_heading = std::fmod(m_heading + 1, 2) - 1; // Normalize to [-1, 1]
+    // }
+
+    m_speed_left = m_speed + (msg->angular.z * 255.0);
+    m_speed_right = m_speed - (msg->angular.z * 255.0);
 
     m_pitch += msg->angular.y;
 
@@ -139,7 +142,7 @@ void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
 
     std_msgs::Float64 pitch_setpoint;
     pitch_setpoint.data = m_pitch;
-    m_pid_pitch_setpoint_pub.publish(pitch_setpoint);
+    m_pid_pitch_setpoint_pub.publish(pitch_setpoint); 
 
     // ROS_INFO("Got cmd_vel: speed: %d, angle: %f", m_speed, msg->angular.z);
 }
@@ -148,8 +151,8 @@ void NodeZero::pid_heading_effort_callback(const std_msgs::Float64::ConstPtr& ms
     // ROS_INFO("Heading effort received: %f", msg->data);
     
     if (m_enabled) {
-        m_speed_left = m_speed + (msg->data * 255.0);
-        m_speed_right = m_speed - (msg->data * 255.0);
+        // m_speed_left = m_speed + (msg->data * 255.0);
+        // m_speed_right = m_speed - (msg->data * 255.0);
 
         m_left_driver.setSpeed(m_speed_left);
         m_right_driver.setSpeed(m_speed_right);
