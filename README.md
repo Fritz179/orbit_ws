@@ -15,28 +15,7 @@ sudo systemctl enable --now avahi-daemon
 ```
 This enables the device to be accessed via raspberrypi.local
 
-### Github (Optional)
-```
-ssh-keygen -t ed25519 -C "deploy-key" -f ~/.ssh/id_bb8_deploy
-cat .ssh/id_bb8_deploy.pub
-```
-Paste the output on github: **Project** -> **Settings** -> **Deploy key** -> **Add deploy key**
-```
-nano ~/.ssh/config
-Host github-bb8
-    HostName github.com
-    User raspberry
-    IdentityFile ~/.ssh/id_bb8_deploy
-    IdentitiesOnly yes
-
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
-
-git clone git@github-bb8:Fritz179/BB8.git
-```
-
-
-### Install ROS 1
+### Install [ROS 1](https://wiki.ros.org/noetic/Installation/Ubuntu)
 ```
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
@@ -49,7 +28,7 @@ sudo rosdep init
 rosdep update
 ```
 
-### Install ROS 2 + Bridge
+### Install [ROS 2](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html) + [Bridge](https://roboticsknowledgebase.com/wiki/interfacing/ros1_ros2_bridge/)
 ```
 sudo apt update && sudo apt install locales
 sudo locale-gen en_US en_US.UTF-8
@@ -68,7 +47,7 @@ source ~/.bashrc
 sudo apt install ros-foxy-ros1-bridge
 ```
 
-### Install catkin
+### Install [catkin](https://catkin-tools.readthedocs.io/en/latest/installing.html)
 ```
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
 wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
@@ -76,14 +55,16 @@ sudo apt-get update
 sudo apt-get install python3-catkin-tools
 ```
 
-### Setup folder structure
+### Setup [RPLIDAR](https://github.com/Slamtec/rplidar_ros)
 ```
 mkdir -p BB8/src/cartographer
 
 cd BB8/src
 git submodule add https://github.com/Slamtec/rplidar_ros.git rplidar_ros
 rosdep install --from-paths . --ignore-src -r -y
+```
 
+```
 cd cartographer
 git submodule add https://github.com/cartographer-project/cartographer.git
 git submodule add https://github.com/cartographer-project/cartographer_ros.git
@@ -98,6 +79,24 @@ sros1
 catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
 catkin build
 source devel/setup.bash
+```
+
+### Github (Optional)
+```
+ssh-keygen -t ed25519 -C "deploy-key" -f ~/.ssh/id_bb8_deploy
+cat .ssh/id_bb8_deploy.pub
+```
+Paste the output on github: **Project** -> **Settings** -> **Deploy key** -> **Add deploy key**
+```
+nano ~/.ssh/config
+Host github-bb8
+    HostName github.com
+    User raspberry
+    IdentityFile ~/.ssh/id_bb8_deploy
+    IdentitiesOnly yes
+
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
 ```
 
 ## RUN
