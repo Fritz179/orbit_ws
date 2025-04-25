@@ -7,3 +7,6 @@ logs/
 # 2. Catkin tools metadata
 .catkin_tools/
 .catkin_workspace
+
+# cartographer abseil
+src/cartographer/abseil-cpp

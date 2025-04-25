@@ -1,3 +1,9 @@
 [submodule "src/rplidar_ros"]
 	path = src/rplidar_ros
 	url = https://github.com/Slamtec/rplidar_ros.git
+[submodule "src/cartographer/cartographer"]
+	path = src/cartographer/cartographer
+	url = https://github.com/cartographer-project/cartographer.git
+[submodule "src/cartographer/cartographer_ros"]
+	path = src/cartographer/cartographer_ros
+	url = https://github.com/cartographer-project/cartographer_ros.git
