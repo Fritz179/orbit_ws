@@ -7,3 +7,9 @@
 [submodule "src/cartographer/cartographer_ros"]
 	path = src/cartographer/cartographer_ros
 	url = https://github.com/cartographer-project/cartographer_ros.git
+[submodule "src/i2c_device_ros"]
+	path = src/i2c_device_ros
+	url = https://github.com/Brazilian-Institute-of-Robotics/i2c_device_ros.git
+[submodule "src/mpu6050_driver"]
+	path = src/mpu6050_driver
+	url = https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver.git

@@ -1,0 +1,27 @@
+<launch>
+    <!-- 1) RPLidar driver -->
+    <node pkg="rplidar_ros" type="rplidarNode" name="rplidar" output="screen">
+        <param name="serial_port"   value="/dev/ttyUSB0"/>
+        <param name="frame_id"      value="laser"/>
+        <param name="angle_compensate" value="true"/>
+    </node>
+
+    <!-- IMU ros node -->
+  <!-- <include file="$(find mpu6050_driver)/launch/mpu6050_driver.launch"/> -->
+
+
+    <!-- 2) Robot URDF description -->
+    <include file="$(find bb8)/launch/description.launch"/>
+
+
+    <!-- 3) Cartographer SLAM with 2D config -->
+    <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" output="screen"
+            args="-configuration_directory $(find bb8)/config
+                  -configuration_basename default.lua">
+    </node>
+
+
+    <!-- 4) Occupancy grid publisher -->
+    <node name="occupancy_grid_node" pkg="cartographer_ros" type="cartographer_occupancy_grid_node" output="screen"
+          args="-resolution 0.05"/>
+</launch>

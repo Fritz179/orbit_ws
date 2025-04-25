@@ -55,15 +55,19 @@ sudo apt-get update
 sudo apt-get install python3-catkin-tools
 ```
 
-### Setup [RPLIDAR](https://github.com/Slamtec/rplidar_ros)
+### Install [RPLIDAR](https://github.com/Slamtec/rplidar_ros) + [IMU](https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver)
 ```
 mkdir -p BB8/src/cartographer
 
 cd BB8/src
 git submodule add https://github.com/Slamtec/rplidar_ros.git rplidar_ros
 rosdep install --from-paths . --ignore-src -r -y
+
+git submodule add https://github.com/Brazilian-Institute-of-Robotics/i2c_device_ros.git
+git submodule add https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver.git
 ```
 
+### Install [cartographer](https://google-cartographer-ros.readthedocs.io/en/latest/index.html)
 ```
 cd cartographer
 git submodule add https://github.com/cartographer-project/cartographer.git
@@ -79,6 +83,12 @@ sros1
 catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
 catkin build
 source devel/setup.bash
+```
+
+### URDF
+```
+sudo apt update
+sudo apt install ros-noetic-urdf ros-noetic-xacro ros-noetic-robot-state-publisher ros-noetic-joint-state-publisher
 ```
 
 ### Github (Optional)
@@ -97,6 +107,24 @@ Host github-bb8
 
 git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
+```
+
+## Ðevelop
+### Build
+Build only `bb8` without dependencies
+```
+catkin build bb8 --no-deps
+```
+
+### [Calibrate](https://mjwhite8119.github.io/Robots/mpu6050)
+```
+roslaunch mpu6050_driver mpu6050_calibration.launch
+```
+
+### XARCO to URDF
+```
+cd ~/BB8/src/bb8
+rosrun xacro xacro urdf/bb8.urdf.xacro -o urdf/bb8.urdf
 ```
 
 ## RUN

@@ -1,0 +1,11 @@
+<launch>
+    <!-- Load robot description -->
+    <param name="robot_description" command="xacro '$(find bb8)/urdf/bb8.urdf.xacro'"/>
+    
+    <!-- Publish static joint states (none variable here) -->
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+
+    <!-- Broadcast TF frames from URDF -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+</launch>
+

@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="spherical_bot">
+
+    <xacro:property name="sphere_diameter" value="0.33"/>
+    <xacro:property name="lidar_height" value="0.15"/>
+    <xacro:property name="imu_height" value="0.13"/>
+    <xacro:property name="mass" value="2"/>
+
+    <!-- Base Sphere -->
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <sphere radius="${sphere_diameter / 2}"/>
+            </geometry>
+            <material name="blue">
+                <color rgba="0 0 1 1"/>
+            </material>
+
+            <!-- <geometry>
+                <mesh filename="$(find bb8)/meshes/sphere.stl"/>
+            </geometry> -->
+        </visual>
+
+        <collision>
+            <geometry>
+                <cylinder length="${sphere_diameter + lidar_height}" radius="${sphere_diameter / 2}"/>
+            </geometry>
+        </collision>
+    </link>
+
+
+    <!-- Head, mesh contains lidar -->
+    <link name="head_link">
+        <visual>
+            <geometry>
+                <sphere radius="${sphere_diameter / 4}"/>
+            </geometry>
+            <material name="red">
+                <color rgba="1 0 0 1"/>
+            </material>
+
+            <!-- <geometry>
+                <mesh filename="$(find bb8)/meshes/sphere.stl"/>
+            </geometry> -->
+        </visual>
+    </link>
+
+    <!-- Laser -->
+    <link name="laser_link"/>
+
+    <!-- IMU -->
+    <link name="imu_link"/>
+
+
+
+    <!-- Revolute joint above the sphere: allows pitching only -->
+    <joint name="head_joint" type="revolute">
+        <parent link="base_link"/>
+        <child  link="head_link"/>
+
+        <!-- Offset joint pivot radius above base center -->
+        <origin xyz="0 0 ${sphere_diameter / 2}" rpy="0 0 0"/>
+        <!-- Axis along Y for forward/back tilt -->
+        <axis  xyz="0 1 0"/>
+        <!-- Limit motion to ±45° -->
+        <limit lower="${-45.0 * pi/180.0}" upper="${45.0 * pi/180.0}"/>
+    </joint>
+
+
+    <!-- Fixed mount lidar_height above head for lidar, mesh contained in head -->
+    <joint name="lidar_joint" type="fixed">
+        <parent link="pitch_link"/>
+        <child  link="lidar_link"/>
+        <origin xyz="0 0 ${lidar_height}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Fixed mount imu_height above head for imu -->
+    <joint name="imu_joint" type="fixed">
+        <parent link="pitch_link"/>
+        <child  link="imu_link"/>
+        <origin xyz="0 0 ${imu_height}" rpy="0 0 0"/>
+    </joint>
+</robot>
