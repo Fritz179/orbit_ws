@@ -1,0 +1,4 @@
+<launch>
+    <node name="bb8_remote" pkg="bb8_remote" type="bb8_remote.py"/>
+
+</launch>

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+
+  <name>bb8_remote</name>
+  <version>0.0.0</version>
+  <description>Remote command and visualization</description>
+
+  <maintainer email="fabrizio.cortesi@stud.fhgr.ch">Fritz_179</maintainer>
+
+  <license>MIT</license>
+  <url type="website">https://github.com/Fritz179/BB8</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <depend>geometry_msgs</depend>
+  
+</package>
