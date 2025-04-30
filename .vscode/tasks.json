@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // This is the ONLY task VS Code will run when you hit Ctrl-Shift-B
+      "label": "catkin build (default)",
+      "type": "shell",
+      "command": "catkin",
+      "args": [
+        "build",
+        "-w",                 // workspace path
+        "${workspaceFolder}", // VS Code auto-fills bb8_ws
+        "-j4",                // four parallel jobs (Pi 4 sweet-spot)
+        "--no-status"         // cleaner output in Problems panel
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true     // marks *this* task as the default build
+      },
+      "problemMatcher": [
+        "$catkin-gcc"         // lets C/C++ extension parse GCC errors
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}
