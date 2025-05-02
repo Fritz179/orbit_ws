@@ -1,24 +1,21 @@
 #include "ros/ros.h"
-#include "std_msgs/Float32.h"
+#include "geometry_msgs/Twist.h"
 
 #include <sstream>
 
 class NodeZero
 {
 public:
-    NodeZero() : m_speed(9.0f) {
-        m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
-        m_set_speed_sub = nh.subscribe("set_speed", 10, &NodeZero::speedCallback, this);
+    NodeZero() : m_speed_left(0.0), m_speed_right(0) {
+        // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
+        m_cmd_vel_sub = nh.subscribe("cmd_vel", 10, &NodeZero::speedCallback, this);
     }
 
     void spin() {
-        ros::Rate loop_rate(10);
+        ros::Rate loop_rate(2);
 
         while (ros::ok()) {
-            std_msgs::Float32 msg;
-            msg.data = m_speed;
-            m_base_state_pub.publish(msg);
-            ROS_INFO("Sending: %f", msg.data);
+            ROS_INFO("Left: '%f', right: '%f'", m_speed_left, m_speed_right);
 
             ros::spinOnce();
             loop_rate.sleep();
@@ -26,19 +23,19 @@ public:
     }
 
 private:
-    void speedCallback(const std_msgs::Float32::ConstPtr& msg) {
-        m_speed = msg->data;
+    void speedCallback(const geometry_msgs::Twist::ConstPtr& msg) {
+        m_speed_left = msg->angular.z;
+        m_speed_right = msg->angular.z;
         
-        std_msgs::Float32 ack;
-        ack.data = 420.69f;
-        m_base_state_pub.publish(ack);
-        ROS_INFO("Set speed to: %f", m_speed);
+        ROS_INFO("Set speed to: %f, %f", m_speed_left, m_speed_right);
     }
 
-    float m_speed;
+    float m_speed_right;
+    float m_speed_left;
+
     ros::NodeHandle nh;
-    ros::Publisher  m_base_state_pub;
-    ros::Subscriber m_set_speed_sub;
+    // ros::Publisher  m_base_state_pub;
+    ros::Subscriber m_cmd_vel_sub;
 };
 
 int main(int argc, char** argv)
