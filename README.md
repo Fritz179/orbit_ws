@@ -1,3 +1,32 @@
+|                         | Pi                    | Zero                              | Remote
+| ---                     | ---                   | ---                               | ---
+| **Role**                | Master                | Slave                             | HMI (Human-Machine Interface)
+| **Primary Function**    | Mapping and Navigation| Movement                          | User Control
+| **Physical Location**   | BB-8 Head             | BB-8 Sphere                       | User Side
+| **Hardware**            | Raspberry Pi 4B       | Raspberry Pi Zero W               | User-Provided Device
+| **Sensor Inputs**       | Lidar / IMU           | IMU / Magnetometer                | Keyboard / Mouse
+| **Outputs**             | Eye LED / Speaker     | Wheels Motors / Head Pitch Stepper| Screen Display
+| &nbsp;                  |                       |                                   | 
+| **OS**                  | Ubuntu 20.04          | Bookworm                          | -
+| **ROS Version**         | ROS 1 and ROS 2       | ROS 1                             | ROS 1 or ROS 2
+| **ROS Distro**          | *noetic* and *foxy*   | *noetic*                          | -
+| **Other Notes**         | Runs `roscore`        | -                                 | RViz
+| **Programming Language**| C++                   | C++                               | Python
+| **Package**             | [`bb8`](src/bb8/bb8)  | [`bb8_zero`](src/bb8/bb8)         | [`bb8_remote`](src/bb8/bb8)
+
+
+# Data flow
+`odom`      [xyz, rpy] where the robot thinks it is based on integrating the imu.
+`map`       [xyz, rpy] where the robot thinks it is based on the lidar scan.
+`base_link` [xyz, rpy] where the robot thinks it is based on the wheel odometry.
+
+Head IMU + RPlidar feed Cartographer and publishes map and `map -> odom` transfrom (May jump).
+Sphere IMU + Wheel odom (Optional) -> UKF -> `odom -> base_link` (Smooth, local driving)
+
+For navigation planning use `map -> odom` to generate /cmd_vel
+For setting motor speeds use `odom -> base_link` + `/cmd_vel` to generate /cmd_motor
+
+
 # Packages structure
 - bb8 => Main code, raspberry pi 4b
 - zero => Sphere
@@ -75,6 +104,20 @@ echo "export ROS_MASTER_URI=http://raspberrypi.local:11311" >> ~/.bashrc
 echo "export ROS_IP=$(hostname -I | awk '{print $1}')" >> ~/.bashrc
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
 
+### catkin build
+# make sure pip itself is present
+sudo apt update
+sudo apt install -y python3-pip          # tiny, pure-Python
+
+# install catkin-tools into your user site-packages
+python3 -m pip install --user --break-system-packages \
+        catkin-tools osrf-pycommon
+# add ~/.local/bin to PATH once
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# verify
+catkin --version                         # should print 0.9.x
 
 ```
 
@@ -221,8 +264,7 @@ cat .ssh/id_bb8_deploy.pub
 Paste the output on github: **Project** -> **Settings** -> **Deploy key** -> **Add deploy key**
 ```
 nano ~/.ssh/config
-Host github-bb8
-    HostName github.com
+Host github.com
     User raspberry
     IdentityFile ~/.ssh/id_bb8_deploy
     IdentitiesOnly yes
@@ -269,3 +311,52 @@ ros2 run rviz2 rviz2 -d ./laser.rviz
 ```
 
 
+### Pi zero
+```
+catkin_make -j1 -DCMAKE_BUILD_TYPE=Release --pkg bb8_zero 
+```
+or
+```
+catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
+catkin build bb8_zero -j1 -p1 --mem-limit 400M
+rosrun bb8_zero bb8_zero_node
+<!-- catkin build bb8_zero  -->
+```
+
+
+
+# TO ADD
+# Pi 4 (master)
+export ROS_MASTER_URI=http://raspberrypi.local:11311
+export ROS_HOSTNAME=raspberrypi.local
+
+# Pi Zero
+export ROS_MASTER_URI=http://raspberrypi.local:11311
+export ROS_HOSTNAME=zero.local
+
+# Very nice!
+sshfs zero:/home/ros/bb8_ws ~/pi_zero
+
+sudo apt install pigpio
+  
+sudo systemctl enable pigpiod   # autostart every boot
+sudo systemctl start  pigpiod   # start it right now
+
+Check status is ok
+systemctl status pigpiod
+
+# for vscode
+catkin build -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+
+move compile_commands from catkin_ws/build under your vscode work directory, i usually have it under catkin_ws/src, personal preference
+
+
+# Fix cartographer dependency
+# Build once (you already did):
+cd /usr/src/googletest
+sudo cmake .
+sudo make            # creates googlemock/libgmock.a  googletest/libgtest.a
+
+# Install to a standard path so every new build can find them:
+sudo cp googlemock/libgmock*.a googletest/libgtest*.a /usr/lib/
+sudo ldconfig        # refresh linker cache
