@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   geometry_msgs
+  tb6612fng
 )
 
 ## System dependencies are found with CMake's conventions
@@ -102,7 +103,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+   INCLUDE_DIRS include
 #  LIBRARIES bb8_zero
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
@@ -115,8 +116,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
   ${catkin_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 ## Declare a C++ library
