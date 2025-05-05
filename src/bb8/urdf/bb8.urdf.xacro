@@ -45,8 +45,8 @@
         </visual>
     </link>
 
-    <!-- Laser -->
-    <link name="laser_link"/>
+    <!-- Lidar -->
+    <link name="lidar_link"/>
 
     <!-- IMU -->
     <link name="imu_link"/>
@@ -63,20 +63,20 @@
         <!-- Axis along Y for forward/back tilt -->
         <axis  xyz="0 1 0"/>
         <!-- Limit motion to ±45° -->
-        <limit lower="${-45.0 * pi/180.0}" upper="${45.0 * pi/180.0}"/>
+        <limit lower="${-45.0 * pi/180.0}" upper="${45.0 * pi/180.0}" effort="1.0" velocity="1.0"/>
     </joint>
 
 
     <!-- Fixed mount lidar_height above head for lidar, mesh contained in head -->
     <joint name="lidar_joint" type="fixed">
-        <parent link="pitch_link"/>
+        <parent link="head_link"/>
         <child  link="lidar_link"/>
         <origin xyz="0 0 ${lidar_height}" rpy="0 0 0"/>
     </joint>
 
     <!-- Fixed mount imu_height above head for imu -->
     <joint name="imu_joint" type="fixed">
-        <parent link="pitch_link"/>
+        <parent link="head_link"/>
         <child  link="imu_link"/>
         <origin xyz="0 0 ${imu_height}" rpy="0 0 0"/>
     </joint>

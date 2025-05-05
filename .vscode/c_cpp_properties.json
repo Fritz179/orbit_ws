@@ -11,6 +11,8 @@
         "/home/ros/bb8_ws/src/bb8/include/**",
         "/home/ros/bb8_ws/src/i2c_device_ros/include/**",
         "/home/ros/bb8_ws/src/mpu6050_driver/include/**",
+        "/home/ros/bb8_ws/src/bb8_zero/include/**",
+        "/home/ros/bb8_ws/src/tb6612fng/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",

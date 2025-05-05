@@ -205,7 +205,22 @@ rosdep install --from-paths . --ignore-src -r -y
 
 git submodule add https://github.com/Brazilian-Institute-of-Robotics/i2c_device_ros.git
 git submodule add https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver.git
+
+sudo apt install i2c-tools
+GPIOs 2&3 (pins 3&5 on the header) are /dev/i2c-1
+i2cdetect -y 1
+Should se 68 as active address, Almost nice!
+
+catkin build mpu6050_driver
+
+To run the calibration process, put the sensor on its final place on your robot (this is strongly important!)
+roslaunch mpu6050_driver mpu6050_calibration.launch
+
+Wait for it to finish and copy and paste into mpu6090_driver/config/mpu_settings.yaml
+
+roslaunch mpu6050_driver mpu6050_driver.launch
 ```
+
 
 ### Create [pacakge](http://wiki.ros.org/ROS/Tutorials/CreatingPackage)
 ```
@@ -301,6 +316,8 @@ roslaunch rplidar_ros rplidar_a1.launch
 
 ### ROS bridge
 ```
+sros1
+sros2
 sros2
 ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
 ```
@@ -360,3 +377,8 @@ sudo make            # creates googlemock/libgmock.a  googletest/libgtest.a
 # Install to a standard path so every new build can find them:
 sudo cp googlemock/libgmock*.a googletest/libgtest*.a /usr/lib/
 sudo ldconfig        # refresh linker cache
+
+
+
+![Pi zero W Pinout](imgs/pi_zero_w_pinout.png)
+![Pi 4b Pinout](imgs/pi_4b_pinout.png)

@@ -1,4 +1,4 @@
-#include "tb6612fng/tb6612fng.h"
+#include "tb6612fng.h"
 
 TB6612FNGMotor::TB6612FNGMotor(uint8_t pwm_pin,
                                uint8_t in1_pin,
@@ -7,9 +7,6 @@ TB6612FNGMotor::TB6612FNGMotor(uint8_t pwm_pin,
     in1_pin_(in1_pin),
     in2_pin_(in2_pin)
 {
-  if (gpioInitialise() < 0) {
-    throw std::runtime_error("pigpio init failed");
-  }
 
   // Configure pins as outputs
   gpioSetMode(pwm_pin_, PI_OUTPUT);
@@ -77,7 +74,6 @@ TB6612FNG::~TB6612FNG()
 {
   // ensure safe shutdown
   standby();
-  gpioTerminate();
 }
 
 void TB6612FNG::activate()
