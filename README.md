@@ -195,6 +195,14 @@ sudo apt-get update
 sudo apt-get install python3-catkin-tools
 ```
 
+### Install [catkin](https://catkin-tools.readthedocs.io/en/latest/installing.html) On Linux Mint
+```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install python3-catkin-tools
+```
+
 ### Install [RPLIDAR](https://github.com/Slamtec/rplidar_ros) + [IMU](https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver)
 ```
 mkdir -p bb8_ws/src/cartographer
@@ -222,10 +230,16 @@ roslaunch mpu6050_driver mpu6050_driver.launch
 ```
 
 
-### Create [pacakge](http://wiki.ros.org/ROS/Tutorials/CreatingPackage)
+### Create [pacakge](http://wiki.ros.org/ROS/Tutorials/CreatingPackage) with catkin
 ```
 cd src
 catkin_create_pkg <package_name> std_msgs rospy roscpp
+```
+
+### Create [pacakge](http://wiki.ros.org/ROS/Tutorials/CreatingPackage) with colcon
+```
+ros2 pkg create --build-type ament_python <package_name>
+ros2 pkg create --build-type ament_cmake <package_name> 
 ```
 
 
@@ -289,10 +303,16 @@ git config --global user.name "Your Name"
 ```
 
 ## Ðevelop
-### Build
+### Build with catkin
 Build only `bb8` without dependencies
 ```
 catkin build bb8 --no-deps
+```
+
+### Build with catkin
+```
+colcon build --packages-up-to bb8_remote
+colcon build --packages-select <name-of-pkg>
 ```
 
 ### [Calibrate](https://mjwhite8119.github.io/Robots/mpu6050)
@@ -327,6 +347,15 @@ ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
 ros2 run rviz2 rviz2 -d ./laser.rviz
 ```
 
+# Joy
+ros2 run package_name executable_name --ros-args -p param_name:=param_value
+ros2 run ps_ros2_common joy_test
+ros2 run teleop_twist_joy teleop_node 
+
+ros2 launch teleop_twist_joy teleop-launch.py --ros-args -p enable_button:=69 -p scale_linear:=2
+
+
+ros2 launch teleop_twist_joy teleop-launch.py
 
 ### Pi zero
 ```
@@ -379,6 +408,55 @@ sudo cp googlemock/libgmock*.a googletest/libgtest*.a /usr/lib/
 sudo ldconfig        # refresh linker cache
 
 
+# zero default noetic is missing common_msgs
+git clone https://github.com/ros/common_msgs.git
+catkin build common_msgs
+rospack find geometry_msgs
+
+
+
+
+# PIGPIO
+
+```
+wget https://github.com/joan2937/pigpio/archive/master.zip
+unzip master.zip
+cd pigpio-master
+make
+sudo make install
+```
+
+copy in /usr/local/lib/pkgconfig/pigpio.pc
+```
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: pigpio
+Description: pigpio C library for Raspberry Pi GPIO control
+Version: 1.79
+Libs: -L${libdir} -lpigpio -pthread -lrt
+Cflags: -I${includedir}
+```
+test
+pkg-config --cflags --libs pigpio
+and get 
+-I/usr/local/include -L/usr/local/lib -lpigpio -pthread -lrt
+
+and to run:
+sudo pigpiod
+
+
+# Run as root
+sudo su root
+export ROS_MASTER_URI=http://raspberrypi.local:11311
+export ROS_IP=zero.local
+source /opt/ros/noetic/setup.bash
+cd bb8_ws
+source devel/setup.bash
+sudo killall pigpiod
+rosrun bb8_zero bb8_zero_node
 
 ![Pi zero W Pinout](imgs/pi_zero_w_pinout.png)
 ![Pi 4b Pinout](imgs/pi_4b_pinout.png)

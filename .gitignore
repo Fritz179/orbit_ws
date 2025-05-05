@@ -1,12 +1,12 @@
-# 1. Workspace build artifacts
+# Catkin artifacts
 build/
 devel/
-install/
-logs/
-
-# 2. Catkin tools metadata
 .catkin_tools/
 .catkin_workspace
+
+# Colcon artifacts
+install/
+logs/
 
 # cartographer abseil
 src/cartographer/abseil-cpp
