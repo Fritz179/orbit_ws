@@ -6,7 +6,7 @@ devel/
 
 # Colcon artifacts
 install/
-logs/
+log/
 
 # cartographer abseil
 src/cartographer/abseil-cpp

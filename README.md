@@ -324,6 +324,10 @@ roslaunch mpu6050_driver mpu6050_calibration.launch
 ```
 cd ~/bb8_ws/src/bb8
 rosrun xacro xacro urdf/bb8.urdf.xacro -o urdf/bb8.urdf
+
+
+ros2 run xacro xacro src/bb8/urdf/bb8.urdf.xacro -o src/bb8/urdf/bb8.urdf
+
 ```
 
 ## RUN
@@ -345,6 +349,7 @@ ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
 ### rviz with .rviz
 ```
 ros2 run rviz2 rviz2 -d ./laser.rviz
+ros2 run rviz2 rviz2 -d ./rviz/map.rviz
 ```
 
 # Joy
