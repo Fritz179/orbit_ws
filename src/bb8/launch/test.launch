@@ -4,10 +4,13 @@
         <param name="serial_port"   value="/dev/ttyUSB0"/>
         <param name="frame_id"      value="laser"/>
         <param name="angle_compensate" value="true"/>
+        <!-- <remap from="scan" to="laser"/> -->
     </node>
 
     <!-- IMU ros node -->
-    <include file="$(find mpu6050_driver)/launch/mpu6050_driver.launch"/>
+    <include file="$(find mpu6050_driver)/launch/mpu6050_driver.launch">
+        <remap from="imu/data_raw" to="imu"/>
+    </include>
 
 
     <!-- Robot URDF description -->
@@ -18,6 +21,7 @@
     <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" output="screen"
             args="-configuration_directory $(find bb8)/config
                   -configuration_basename test.lua">
+            <remap from="imu/data_raw" to="imu"/>
     </node>
 
 
