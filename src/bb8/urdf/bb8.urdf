@@ -40,7 +40,7 @@
   <!-- Lidar -->
   <link name="laser"/>
   <!-- IMU -->
-  <link name="imu_link"/>
+  <link name="imu"/>
   <!-- Revolute joint above the sphere: allows pitching only -->
   <joint name="head_joint" type="revolute">
     <parent link="base_link"/>
@@ -61,7 +61,7 @@
   <!-- Fixed mount imu_height above head for imu -->
   <joint name="imu_joint" type="fixed">
     <parent link="head_link"/>
-    <child link="imu_link"/>
+    <child link="imu"/>
     <origin rpy="0 0 0" xyz="0 0 0.13"/>
   </joint>
 </robot>
