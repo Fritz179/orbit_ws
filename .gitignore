@@ -3,6 +3,7 @@ build/
 devel/
 .catkin_tools/
 .catkin_workspace
+logs/
 
 # Colcon artifacts
 install/

@@ -2,6 +2,7 @@
 #define A4988_H
 
 #include <cstdint>
+#include "NC.h"
 
 class A4988 {
 public:
@@ -53,7 +54,22 @@ public:
    * @param steps      Number of step pulses to generate.
    * @param period_us  Total pulse period in microseconds (must be ≥ pulse width).
    */
-  void step(uint32_t steps, uint32_t period_us);
+  void step_sync(uint32_t steps, uint32_t period_us);
+
+  /**
+   * Step the motor async.
+   * Doesn't block.
+   * @param steps      Number of step pulses to generate.
+   * @param period_us  Total pulse period in microseconds (must be ≥ pulse width).
+   */
+  void step_async(uint32_t steps, uint32_t period_us);
+
+  /**
+   * Check if the motor is stepping.
+   * @return Is still stepping.
+   */
+  bool is_stepping();
+
 
 private:
   uint8_t step_pin_;

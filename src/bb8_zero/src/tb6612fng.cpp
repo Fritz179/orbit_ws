@@ -57,35 +57,10 @@ void TB6612FNGMotor::brake()
 
 // ----------------------------------------------------------------------------
 
-TB6612FNG::TB6612FNG(uint8_t stby_pin,
-                     uint8_t pwma, uint8_t ain1, uint8_t ain2,
+TB6612FNG::TB6612FNG(uint8_t pwma, uint8_t ain1, uint8_t ain2,
                      uint8_t pwmb, uint8_t bin1, uint8_t bin2)
-  : stby_pin_(stby_pin),
-    motorA_(pwma, ain1, ain2),
+  : motorA_(pwma, ain1, ain2),
     motorB_(pwmb, bin1, bin2)
-{
-  // Configure standby pin
-  gpioSetMode(stby_pin_, PI_OUTPUT);
-  // Start in standby (motors braked in their ctors)
-  gpioWrite(stby_pin_, 0);
-}
+{}
 
-TB6612FNG::~TB6612FNG()
-{
-  // ensure safe shutdown
-  standby();
-}
-
-void TB6612FNG::activate()
-{
-  gpioWrite(stby_pin_, 1);
-}
-
-void TB6612FNG::standby()
-{
-  // brake both channels...
-  motorA_.brake();
-  motorB_.brake();
-  // ...then disable outputs
-  gpioWrite(stby_pin_, 0);
-}
+TB6612FNG::~TB6612FNG() {}

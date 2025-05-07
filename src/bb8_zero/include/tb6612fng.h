@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include "NC.h"
+
 /**
  * @brief Driver for one channel of a TB6612FNG motor driver
  */
@@ -44,21 +46,13 @@ private:
 class TB6612FNG {
 public:
   /**
-   * @param stby_pin  GPIO pin for STBY (active high)
    * @param pwma, ain1, ain2  pins for Motor A
    * @param pwmb, bin1, bin2  pins for Motor B
    */
-  TB6612FNG(uint8_t stby_pin,
-            uint8_t pwma, uint8_t ain1, uint8_t ain2,
+  TB6612FNG(uint8_t pwma, uint8_t ain1, uint8_t ain2,
             uint8_t pwmb, uint8_t bin1, uint8_t bin2);
 
   ~TB6612FNG();
-
-  /** Enable the driver (STBY = HIGH) */
-  void activate();
-
-  /** Disable the driver (STBY = LOW + brakes both motors) */
-  void standby();
 
   /** Access Motor A */
   TB6612FNGMotor& A() { return motorA_; }
@@ -67,7 +61,6 @@ public:
   TB6612FNGMotor& B() { return motorB_; }
 
 private:
-  uint8_t stby_pin_;
   TB6612FNGMotor motorA_, motorB_;
   
   // disable copy

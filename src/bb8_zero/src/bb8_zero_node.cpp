@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
     }
 
     NodeZero node;
-    node.spin();
+    ros::spin();
 
     gpioTerminate();
     return 0;

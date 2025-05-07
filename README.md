@@ -361,6 +361,8 @@ ros2 launch teleop_twist_joy teleop-launch.py --ros-args -p enable_button:=69 -p
 
 
 ros2 launch teleop_twist_joy teleop-launch.py
+or
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ### Pi zero
 ```
@@ -465,3 +467,7 @@ rosrun bb8_zero bb8_zero_node
 
 ![Pi zero W Pinout](imgs/pi_zero_w_pinout.png)
 ![Pi 4b Pinout](imgs/pi_4b_pinout.png)
+
+
+# tf pdf
+rosrun tf view_frames

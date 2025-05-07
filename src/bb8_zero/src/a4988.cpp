@@ -1,6 +1,7 @@
 #include "a4988.h"
 #include <pigpio.h>
 #include <unistd.h>  // for gpioDelay
+#include <vector>
 
 A4988::A4988(uint8_t step_pin,
                            uint8_t dir_pin,
@@ -86,7 +87,7 @@ void A4988::setMicrostepMode(MicrostepMode mode)
   }
 }
 
-void A4988::step(uint32_t steps, uint32_t period_us)
+void A4988::step_sync(uint32_t steps, uint32_t period_us)
 {
   // Ensure period is at least as long as pulse width * 2
   if (period_us < kPulseWidthUs * 2) {
@@ -100,4 +101,26 @@ void A4988::step(uint32_t steps, uint32_t period_us)
     gpioWrite(step_pin_, 0);
     gpioDelay(period_us - kPulseWidthUs);
   }
+}
+
+void A4988::step_async(uint32_t steps, uint32_t period_us)
+{
+  gpioWaveClear();
+
+  std::vector<gpioPulse_t> pulses;
+  pulses.reserve(steps * 2);
+  
+  uint32_t mask = 1u << step_pin_;
+  for (uint32_t i = 0; i < steps; ++i) {
+    pulses.push_back({mask, 0, kPulseWidthUs});
+    pulses.push_back({0,   mask, period_us - kPulseWidthUs});
+  }
+
+  gpioWaveAddGeneric(pulses.size(), pulses.data());
+  int wid = gpioWaveCreate();
+  gpioWaveTxSend(wid, PI_WAVE_MODE_ONE_SHOT);   // returns straight away
+}
+
+bool A4988::is_stepping() {
+  return gpioWaveTxBusy();
 }
