@@ -471,3 +471,71 @@ rosrun bb8_zero bb8_zero_node
 
 # tf pdf
 rosrun tf view_frames
+
+
+
+The BB8 Projects has a raspberry pi 4b board mounted on the head, conencted with an mpu6050 and a rplidar a1.
+The secondary board is pi Zero W in the inside a sphere controlling a car and also has an mpu6050. it aslo controlls a stepper which can move the head along one axis, the head is attached magnetically to the sphere.
+The head has a speaker and a led which can be controlled by the pi 4b.
+
+The pi 4b runs a ROS noetic and runs the roscore on ubutnu 20.04 and uses cartographer for mapping and localization.
+The zero also has nouetic but on a custom image, it has a custom kernel and uses pigpio to control the motors.
+The center of mass is below the center of the sphere, but not by much, it is stable when unpowered
+
+The wheels don't have an encoder, the position of the stepper is known an can therrfore theoretically transform from one imu to the other.
+
+The code is located at https://github.com/Fritz179/bb8_ws
+
+
+
+How do I best balance the robot? The wheels don't have an encoder, i was thinking of using robot_localization but unsure if I want to use the imu in the sphere or also the data from the top one, the position of the stepper is known an can therrfore theoretically transform from one imu to the other
+
+# Remote
+
+| /joy or keyboard
++-bb8_remote
+| /cmd_vel
+| /cmd_head
+| /cmd_head_calibrate
+
+# Pi 4b
+
+| head/imu_raw
++-ekf_localization
+| head/imu_filtered
+
+| head/imu_raw
+| head/rplidar
++-cartographer
+| /map
+| tf map->odom
+
++-ros_bridge
+
+# Pi Zero W
+
+| spere/imu_raw
++-ekf_localization
+| spere/imu_filtered
+
+| sphere/imu_filtered
+| sphere/odometry (low weight)
++-ukf_localization_node
+| /robot_state_sphere
+
+| /robot_state_sphere
+| /cmd_vel
+| /cmd_head
+| /cmd_head_calibrate
++-bb8_zero
+| DC Motor
+| Stepper Motor
+
+
+// TODO:
+rviz_imu_plugin for imu visualizzation  
+sudo apt install ros-noetic-navigation
+
+
+rosdep install -y --from-paths src --ignore-src --rosdistro humble -r --os=ubuntu:jammy
+colcon build --packages-up-to moveit_setup_assistant --cmake-args -DCMAKE_BUILD_TYPE=Release

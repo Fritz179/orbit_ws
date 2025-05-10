@@ -18,7 +18,7 @@ NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0),
     m_cmd_vel_sub = nh.subscribe("cmd_vel", 10, &NodeZero::cmd_vel_callback, this);
     m_cmd_head_sub = nh.subscribe("cmd_head", 10, &NodeZero::cmd_head_callback, this);
 
-    m_cmd_head_calibrate_sub = nh.subscribe("cmd_head_limit", 10, &NodeZero::cmd_head_calibrate_callback, this);
+    m_cmd_head_calibrate_sub = nh.subscribe("cmd_head_calibrate", 10, &NodeZero::cmd_head_calibrate_callback, this);
 
     node = this;
 
