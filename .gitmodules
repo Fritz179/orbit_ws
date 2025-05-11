@@ -17,3 +17,6 @@
 	path = src/robot_localization
 	url = https://github.com/cra-ros-pkg/robot_localization.git
 	branch = noetic-devel
+[submodule "src/octomap_mapping"]
+	path = src/octomap_mapping
+	url = https://github.com/OctoMap/octomap_mapping.git
