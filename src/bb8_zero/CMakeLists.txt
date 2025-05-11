@@ -23,8 +23,8 @@ include_directories(
 add_executable(${PROJECT_NAME}
   src/bb8_zero_node.cpp 
   src/bb8_zero.cpp 
-  src/a4988.cpp 
-  src/tb6612fng.cpp
+  src/drv8871.cpp 
+  src/atd5833.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

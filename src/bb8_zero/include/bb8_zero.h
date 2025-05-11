@@ -2,8 +2,8 @@
 #include "std_msgs/Empty.h"
 #include "geometry_msgs/Twist.h"
 
-#include "tb6612fng.h"
-#include "a4988.h"
+#include "drv8871.h"
+#include "atd5833.h"
 
 #include <sstream>
 
@@ -21,7 +21,7 @@ public:
             HOAMING,
         };
 
-        A4988 stepper_driver;
+        ATD5833 stepper_driver;
 
         uint8_t  ls_left;
         uint8_t  ls_right;
@@ -30,7 +30,7 @@ public:
         uint32_t desired_steps;
         State    state;
 
-        Head(A4988 stepper, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
+        Head(ATD5833 stepper, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
     :   stepper_driver(stepper),
         ls_left(ls_left),
         ls_right(ls_right),
@@ -57,7 +57,8 @@ public:
 private:
     int16_t m_speed_right;
     int16_t m_speed_left;
-    TB6612FNG m_dc_driver;
+    DRV8871 m_left_driver;
+    DRV8871 m_right_driver;
 
     Head m_head;
 

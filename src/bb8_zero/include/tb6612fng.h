@@ -3,10 +3,7 @@
 
 #include <pigpio.h>
 #include <cstdint>
-#include <stdexcept>
 #include <algorithm>
-
-#include "NC.h"
 
 /**
  * @brief Driver for one channel of a TB6612FNG motor driver

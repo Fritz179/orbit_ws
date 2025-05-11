@@ -7,11 +7,12 @@ const int MOTOR_SPEED = 500;
 
 NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0), 
     
-    // TB6612FNG(pwma, ain1, ain2, pwmb, bin1, bin2);
-    m_dc_driver( 19,   5,    6,    13,   0,    11),
+    // DRV8871(    in1_pin, in2_pin);
+    m_left_driver( 20,      21),
+    m_right_driver(19,      26),
 
-    // A4988(    step_pin, dir_pin, enable_pin, ms1_pin, ms2_pin, ms3_pin) ls_left, ls_right, max_steps
-    m_head(A4988(21,       20,      16,         12,      1,       7),      23,      25,       555)
+    // ATD5833(    step_pin, dir_pin, enable_pin, ms1_pin, ms2_pin) ls_left, ls_right, max_steps
+    m_head(ATD5833(7,        8,       25,         24,      23),     15,      14,       555)
 
 {
     // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
@@ -43,8 +44,8 @@ void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed_left = (int16_t)(msg->linear.x * 255.0 / 5.0);
     m_speed_right = (int16_t)(msg->linear.y * 255.0 / 5.0);
 
-    m_dc_driver.A().setSpeed(m_speed_left);
-    m_dc_driver.B().setSpeed(m_speed_right);
+    m_left_driver.setSpeed(m_speed_left);
+    m_right_driver.setSpeed(m_speed_right);
 
     print_state();
 }
@@ -78,6 +79,7 @@ void NodeZero::cmd_head_calibrate_callback_impl() {
         m_head.stepper_driver.step_sync(-1, MOTOR_SPEED);
     }
 
+    m_head.stepper_driver.setMicrostepMode(ATD5833::MicrostepMode::SIXTEENTH);
     int count = 0;
 
     // Go right and count
@@ -108,7 +110,8 @@ void NodeZero::update_head() {
     int diff = m_head.desired_steps - m_head.current_steps;
     if (!diff) return;
 
-    m_head.stepper_driver.step_async(diff, MOTOR_SPEED);
+    m_head.stepper_driver.step_async(diff / m_head.stepper_driver.getMicrostepSize(), MOTOR_SPEED);
+    m_head.current_steps += diff;
     print_state();
 }
 
