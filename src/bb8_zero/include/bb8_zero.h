@@ -1,6 +1,10 @@
 #include "std_msgs/Float32.h"
 #include "std_msgs/Empty.h"
 #include "geometry_msgs/Twist.h"
+#include "geometry_msgs/AccelWithCovarianceStamped.h"
+#include "nav_msgs/Odometry.h"
+
+
 
 #include "drv8871.h"
 #include "atd5833.h"
@@ -77,5 +81,28 @@ private:
     void cmd_head_calibrate_callback(const std_msgs::Empty::ConstPtr& msg);
     void cmd_head_calibrate_callback_impl();
 
+    // Subscribe ekf
+    ros::Subscriber m_accel_filtered_sub;
+    void accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
+    geometry_msgs::AccelWithCovarianceStamped m_accel;
+    
+    // Subscibe Odometry
+    ros::Subscriber m_odometry_filtered_sub; 
+    void odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg);
+    nav_msgs::Odometry m_odom; 
+
     void update_head();
+    void update_PID();
 };
+
+class PID {
+    public:
+        PID(double kp, double ki, double kd)
+            : kp_(kp), ki_(ki), kd_(kd), prev_error_(0.0), integral_(0.0), prev_time_(ros::Time::now()) {}
+    
+        double update(double target, double current);
+    private:
+        double kp_, ki_, kd_;
+        double prev_error_, integral_;
+        ros::Time prev_time_;
+    };
