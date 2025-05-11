@@ -15,4 +15,5 @@
 	url = https://github.com/Brazilian-Institute-of-Robotics/mpu6050_driver.git
 [submodule "src/robot_localization"]
 	path = src/robot_localization
-	url = git@github.com:cra-ros-pkg/robot_localization.git
+	url = https://github.com/cra-ros-pkg/robot_localization.git
+	branch = noetic-devel

@@ -539,3 +539,17 @@ sudo apt install ros-noetic-navigation
 
 rosdep install -y --from-paths src --ignore-src --rosdistro humble -r --os=ubuntu:jammy
 colcon build --packages-up-to moveit_setup_assistant --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+
+ros@raspberrypi:~$ cat /boot/firmware/usercfg.txt 
+# Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
+# this file. Please refer to the README file for a description of the various
+# configuration files on the boot partition.
+
+dtparam=audio=on                     # keep analogue/PWM audio enabled
+dtoverlay=audremap,pins_12_13        # move L/R to GPIO12 & GPIO13
+
+cat /sys/class/thermal/thermal_zone0/temp
+
+
+S2E05
