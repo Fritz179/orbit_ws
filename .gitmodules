@@ -17,3 +17,37 @@
 	path = src/robot_localization
 	url = https://github.com/cra-ros-pkg/robot_localization.git
 	branch = noetic-devel
+[submodule "src/angles"]
+	path = src/angles
+	url = https://github.com/ros/angles.git
+	branch = noetic-devel
+[submodule "src/geographic_info"]
+	path = src/geographic_info
+	url = https://github.com/ros-geographic-info/geographic_info.git
+[submodule "src/unique_identifier"]
+	path = src/unique_identifier
+	url = https://github.com/ros-geographic-info/unique_identifier.git
+[submodule "src/diagnostics"]
+	path = src/diagnostics
+	url = https://github.com/ros/diagnostics.git
+	branch = noetic-devel
+[submodule "src/geometry"]
+	path = src/geometry
+	url = https://github.com/ros/geometry.git
+[submodule "src/nodelet_core"]
+	path = src/nodelet_core
+	url = https://github.com/ros/nodelet_core.git
+
+[submodule "src/bond_core"]
+	path = src/bond_core
+	url = https://github.com/ros/bond_core.git
+	branch = noetic-devel
+[submodule "src/roslint"]
+	path = src/roslint
+	url = https://github.com/ros/roslint.git
+[submodule "src/geometry2"]
+	path = src/geometry2
+	url = https://github.com/ros/geometry2.git
+[submodule "src/actionlib"]
+	path = src/actionlib
+	url = https://github.com/ros/actionlib.git
