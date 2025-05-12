@@ -37,7 +37,6 @@
 [submodule "src/nodelet_core"]
 	path = src/nodelet_core
 	url = https://github.com/ros/nodelet_core.git
-
 [submodule "src/bond_core"]
 	path = src/bond_core
 	url = https://github.com/ros/bond_core.git
@@ -51,3 +50,6 @@
 [submodule "src/actionlib"]
 	path = src/actionlib
 	url = https://github.com/ros/actionlib.git
+[submodule "src/octomap_mapping"]
+	path = src/octomap_mapping
+	url = https://github.com/OctoMap/octomap_mapping.git
