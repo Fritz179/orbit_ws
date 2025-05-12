@@ -20,3 +20,11 @@
 [submodule "src/octomap_mapping"]
 	path = src/octomap_mapping
 	url = https://github.com/OctoMap/octomap_mapping.git
+[submodule "src/ros1_bridge"]
+	path = src/ros1_bridge
+	url = https://github.com/ros2/ros1_bridge.git
+	branch = foxy
+[submodule "src/cartographer/cartographer_ros2"]
+	path = src/cartographer/cartographer_ros2
+	url = https://github.com/ros2/cartographer_ros.git
+	branch = ros2

@@ -344,6 +344,7 @@ sros1
 sros2
 sros2
 ros2 run ros1_bridge dynamic_bridge --bridge-all-topics
+ros2 run ros1_bridge dynamic_bridge --bridge-all-topics --bridge-all-services
 ```
 
 ### rviz with .rviz
@@ -553,3 +554,29 @@ cat /sys/class/thermal/thermal_zone0/temp
 
 
 S2E05
+
+# Bridge with cartographer
+sros1
+source devel/setup.bash # Sees cartographer messages
+
+sros2
+cd src
+git clone https://github.com/ros2/ros1_bridge.git
+cd ..
+# colcon build --packages-select ros1_bridge
+rosdep install -y --from-paths src/ros1_bridge --ignore-src --rosdistro foxy
+colcon build --build-base colcon_build --packages-select ros1_bridge
+source install/setup.bash
+
+run the bride and the check with:
+ros2 run ros1_bridge dynamic_bridge --print-pairs | grep SubmapList
+
+
+ffmpeg -i sw.wav -af "volume=10dB" sws.wav
+ffmpeg -i lo.wav -af "volume=-1dB" lob.wav
+speaker-test -t wav -c 2
+
+# God forgive me for what I am about to do
+touch src/cartographer/cartographer_ros/COLCON_IGNORE
+colcon build --packages-select cartographer_ros_msgs --build-base colcon_build
+colcon build --packages-select ros1_bridge --cmake-force-configure --build-base colcon_build    
