@@ -53,3 +53,9 @@
 [submodule "src/octomap_mapping"]
 	path = src/octomap_mapping
 	url = https://github.com/OctoMap/octomap_mapping.git
+[submodule "src/pid"]
+	path = src/pid
+	url = https://bitbucket.org/AndyZe/pid.git
+[submodule "src/zero_dependencies/dynamic_reconfigure"]
+	path = src/zero_dependencies/dynamic_reconfigure
+	url = https://github.com/ros/dynamic_reconfigure.git
