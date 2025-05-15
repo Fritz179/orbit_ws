@@ -61,3 +61,6 @@
 	path = src/cartographer/cartographer_ros2
 	url = https://github.com/ros2/cartographer_ros.git
 	branch = ros2
+[submodule "src/pid"]
+	path = src/pid
+	url = https://bitbucket.org/AndyZe/pid.git
