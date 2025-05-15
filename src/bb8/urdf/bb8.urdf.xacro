@@ -1,12 +1,29 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="spherical_bot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ORBIT">
 
     <xacro:property name="sphere_diameter" value="0.33"/>
-    <xacro:property name="lidar_height" value="0.15"/>
-    <xacro:property name="imu_height" value="0.13"/>
-    <xacro:property name="mass" value="2"/>
+    <xacro:property name="head_diameter" value="${sphere_diameter / 2}"/>
+    <xacro:property name="mass" value="10"/>
 
-    <!-- Base Sphere -->
+    <!-- From base_footprint -->
+    <xacro:property name="head_revolution_height" value="${sphere_diameter / 2}"/>
+    <xacro:property name="sphere_imu_height" value="${sphere_diameter / 2}"/>
+    
+    <!-- From head_link -->
+    <xacro:property name="head_imu_height" value="0.089"/>
+    <xacro:property name="lidar_height" value="0.119"/>
+
+
+    <!-- Fottprint, bottom of the sphere, contact point with the terrain -->
+    <link name="base_footprint">
+        <collision>
+            <geometry>
+                <cylinder length="${sphere_diameter + lidar_height}" radius="${sphere_diameter / 2}"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <!-- Center of the sphere, revolution center point for the head -->
     <link name="base_link">
         <visual>
             <geometry>
@@ -20,16 +37,10 @@
                 <mesh filename="$(find bb8)/meshes/sphere.stl"/>
             </geometry> -->
         </visual>
-
-        <collision>
-            <geometry>
-                <cylinder length="${sphere_diameter + lidar_height}" radius="${sphere_diameter / 2}"/>
-            </geometry>
-        </collision>
     </link>
 
 
-    <!-- Head, mesh contains lidar -->
+    <!-- Head base, point where the middle of the head "touches" the sphere -->
     <link name="head_link">
         <visual>
             <geometry>
@@ -45,13 +56,29 @@
         </visual>
     </link>
 
+    <!-- IMU in the sphere -->
+    <link name="sphere_imu"/>
+
     <!-- Lidar -->
     <link name="laser"/>
 
-    <!-- IMU -->
-    <link name="imu"/>
+    <!-- IMU in the head -->
+    <link name="head_imu"/>
 
 
+    <!-- Revolution center point for the head -->
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child  link="base_link"/>
+        <origin xyz="0 0 ${head_revolution_height}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Fixed mount sphere IMU -->
+    <joint name="sphere_imu_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child  link="sphere_imu"/>
+        <origin xyz="0 0 ${sphere_imu_height}" rpy="0 0 0"/>
+    </joint>
 
     <!-- Revolute joint above the sphere: allows pitching only -->
     <joint name="head_joint" type="revolute">
@@ -59,25 +86,24 @@
         <child  link="head_link"/>
 
         <!-- Offset joint pivot radius above base center -->
-        <origin xyz="0 0 ${sphere_diameter / 2}" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <!-- Axis along Y for forward/back tilt -->
         <axis  xyz="0 1 0"/>
         <!-- Limit motion to ±45° -->
-        <limit lower="${-45.0 * pi/180.0}" upper="${45.0 * pi/180.0}" effort="1.0" velocity="1.0"/>
+        <limit lower="${-45.0 * pi / 180.0}" upper="${45.0 * pi / 180.0}" effort="1.0" velocity="1.0"/>
     </joint>
 
-
-    <!-- Fixed mount lidar_height above head for lidar, mesh contained in head -->
+    <!-- Fixed mount lidar_height above head for lidar -->
     <joint name="lidar_joint" type="fixed">
         <parent link="head_link"/>
         <child  link="laser"/>
         <origin xyz="0 0 ${lidar_height}" rpy="0 0 0"/>
     </joint>
 
-    <!-- Fixed mount imu_height above head for imu -->
-    <joint name="imu_joint" type="fixed">
+    <!-- Fixed mount head_imu_height above head for imu -->
+    <joint name="head_imu_joint" type="fixed">
         <parent link="head_link"/>
-        <child  link="imu"/>
-        <origin xyz="0 0 ${imu_height}" rpy="0 0 0"/>
+        <child  link="head_imu"/>
+        <origin xyz="0 0 ${head_imu_height}" rpy="0 0 0"/>
     </joint>
 </robot>

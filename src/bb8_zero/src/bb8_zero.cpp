@@ -34,7 +34,7 @@ NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0),
 
     nh.createTimer(ros::Duration(0.02),   // 50 Hz
     [&](const ros::TimerEvent&){  
-        update_PID();
+        // update_PID();
     });
 
     
@@ -52,6 +52,10 @@ void NodeZero::print_state() {
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed_left = (int16_t)(msg->linear.x * 255.0 / 5.0);
     m_speed_right = (int16_t)(msg->linear.y * 255.0 / 5.0);
+
+    m_left_driver.setSpeed(m_speed_left);
+    m_right_driver.setSpeed(m_speed_right);
+
     return;
 }
 
@@ -203,8 +207,8 @@ void NodeZero::update_PID(){
     // control_left = std::clamp(control_left, -1.0, 1.0);
     // control_right = std::clamp(control_right, -1.0, 1.0);
     
-    m_left_driver.setSpeed(control_left);
-    m_right_driver.setSpeed(control_right);
+    // m_left_driver.setSpeed(control_left);
+    // m_right_driver.setSpeed(control_right);
 
     print_state();
 }

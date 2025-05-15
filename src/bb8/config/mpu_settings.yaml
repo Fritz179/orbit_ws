@@ -8,7 +8,7 @@ mpu_address: 0x68
 pub_rate: 500
 
 # Frame if of IMU message (default: "imu")
-frame_id: "imu"
+frame_id: "head_imu"
 
 # Offsets to fix wrong values caused by misalignment
 # Sequence is (ax, ay, az, gx, gy, gz) (default: [0, 0, 0, 0, 0, 0])

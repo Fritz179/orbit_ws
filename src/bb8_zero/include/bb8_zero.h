@@ -4,8 +4,6 @@
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
 #include "nav_msgs/Odometry.h"
 
-
-
 #include "drv8871.h"
 #include "atd5833.h"
 
