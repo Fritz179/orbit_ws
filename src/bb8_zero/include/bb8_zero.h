@@ -11,6 +11,18 @@
 
 void limit_switch_callback(int pin, int edge, uint32_t tick);
 
+class PID {
+    public:
+        PID(double kp, double ki, double kd)
+            : kp_(kp), ki_(ki), kd_(kd), prev_error_(0.0), integral_(0.0), prev_time_(ros::Time::now()) {}
+    
+        double update(double target, double current);
+    private:
+        double kp_, ki_, kd_;
+        double prev_error_, integral_;
+        ros::Time prev_time_;
+    };
+
 class NodeZero
 {
 public:
@@ -89,18 +101,9 @@ private:
     void odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg);
     nav_msgs::Odometry m_odom; 
 
+    PID pid_left;
+    PID pid_right;
+
     void update_head();
     void update_PID();
 };
-
-class PID {
-    public:
-        PID(double kp, double ki, double kd)
-            : kp_(kp), ki_(ki), kd_(kd), prev_error_(0.0), integral_(0.0), prev_time_(ros::Time::now()) {}
-    
-        double update(double target, double current);
-    private:
-        double kp_, ki_, kd_;
-        double prev_error_, integral_;
-        ros::Time prev_time_;
-    };

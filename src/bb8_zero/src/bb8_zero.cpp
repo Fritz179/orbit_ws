@@ -7,7 +7,10 @@ NodeZero* node;
 const int MOTOR_SPEED = 500;
 
 NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0), 
-    
+    // Create PID controllers for each motor (tune gains as needed)
+    pid_left(1.0, 0.0, 0.0),
+    pid_right(1.0, 0.0, 0.0),    
+
     // DRV8871(    in1_pin, in2_pin);
     m_left_driver( 20,      21),
     m_right_driver(19,      26),
@@ -36,8 +39,6 @@ NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0),
     [&](const ros::TimerEvent&){  
         // update_PID();
     });
-
-    
 }
 
 void NodeZero::print_state() {
@@ -178,10 +179,6 @@ void NodeZero::accel_filtered_callback(const geometry_msgs::AccelWithCovarianceS
     ROS_INFO("Absolute velocity: %f", absolut_velocity_linear);
     
 }
-
-// Create PID controllers for each motor (tune gains as needed)
-PID pid_left(1.0, 0.0, 0.0);
-PID pid_right(1.0, 0.0, 0.0);
 
 void NodeZero::update_PID(){
     // Estimate forward velocity magnitude (assumes forward is along x)
