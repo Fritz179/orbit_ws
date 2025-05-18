@@ -19,7 +19,7 @@ NodeZero::NodeZero(int pi) : m_speed_left(0), m_speed_right(0), m_PI(pi),
     m_ls_right_cb_id(0),
 
     // ATD5833(            step_pin, dir_pin, ms1_pin, ms2_pin) ls_left, ls_right, max_steps
-    m_head(pi, ATD5833(pi, 7,        8,       24,      23),     15,      14,       555)
+    m_head(pi, ATD5833(pi, 8,        7,       24,      23),     15,      14,       555)
 
 {
     // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);

@@ -1,4 +1,9 @@
 <launch>
-    <node name="bb8_remote" pkg="bb8_remote" type="bb8_remote.py"/>
+        <node name="rqt_plot_pid_pitch" pkg="rqt_plot" type="rqt_plot"
+    args="pid_pitch/control_effort/data pid_pitch/state/data pid_pitch/setpoint/data" />
+    
+            <node name="rqt_plot_pid_heading" pkg="rqt_plot" type="rqt_plot"
+    args="pid_heading/control_effort/data pid_heading/state/data pid_heading/setpoint/data" />
 
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
 </launch>
