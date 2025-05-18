@@ -4,12 +4,13 @@
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
 #include "nav_msgs/Odometry.h"
 
-#include "drv8871.h"
+#include "l298n.h"
 #include "atd5833.h"
+#include <pigpiod_if2.h>
 
 #include <sstream>
 
-void limit_switch_callback(int pin, int edge, uint32_t tick);
+void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick);
 
 class PID {
     public:
@@ -44,7 +45,7 @@ public:
         uint32_t desired_steps;
         State    state;
 
-        Head(ATD5833 stepper, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
+        Head(int pi, ATD5833 stepper, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
     :   stepper_driver(stepper),
         ls_left(ls_left),
         ls_right(ls_right),
@@ -54,25 +55,30 @@ public:
         state(State::CALIBRATING)
         {
             // configure limit‐switch pins as inputs with pull-ups
-            gpioSetMode(ls_left,  PI_INPUT);
-            gpioSetPullUpDown(ls_left, PI_PUD_UP);
-            gpioSetMode(ls_right, PI_INPUT);
-            gpioSetPullUpDown(ls_right, PI_PUD_UP);
+            set_mode(pi, ls_left,  PI_INPUT);
+            set_pull_up_down(pi, ls_left, PI_PUD_UP);
+            set_mode(pi, ls_right, PI_INPUT);
+            set_pull_up_down(pi, ls_right, PI_PUD_UP);
         }
     };
 
 
-    NodeZero();
+    NodeZero(int);
     void spin();
 
     void limit_switch_callback_impl(int pin, int edge, uint32_t tick);
     void print_state();
 
 private:
+    int m_PI;
+
     int16_t m_speed_right;
     int16_t m_speed_left;
-    DRV8871 m_left_driver;
-    DRV8871 m_right_driver;
+    L298N m_left_driver;
+    L298N m_right_driver;
+
+    int m_ls_left_cb_id;
+    int m_ls_right_cb_id;
 
     Head m_head;
 

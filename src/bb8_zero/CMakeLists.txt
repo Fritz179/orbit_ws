@@ -9,7 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PIGPIO REQUIRED pigpio)
+# pkg_check_modules(PIGPIO REQUIRED pigpio)
+
+find_library(PIGPIOD_LIB
+             NAMES pigpiod_if2
+             PATHS /usr/lib /usr/local/lib
+)
 
 catkin_package(
    INCLUDE_DIRS include
@@ -24,13 +29,13 @@ include_directories(
 add_executable(${PROJECT_NAME}
   src/bb8_zero_node.cpp 
   src/bb8_zero.cpp 
-  src/drv8871.cpp 
+  src/l298n.cpp 
   src/atd5833.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${PIGPIO_LIBRARIES}
+  ${PIGPIOD_LIB}
 )
 
 install(TARGETS ${PROJECT_NAME}

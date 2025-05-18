@@ -1,20 +1,19 @@
-#ifndef DRV8871_H
-#define DRV8871_H
+#ifndef L298N_H
+#define L298N_H
 
-#include <pigpiod_if2.h>
 #include <cstdint>
 #include <algorithm>
 
 /**
- * @brief Driver for one channel of a DRV8871 motor driver
+ * @brief Driver for one channel of a L298N motor driver
  */
-class DRV8871 {
+class L298N {
 public:
   /**
    * @param in1_pin   GPIO pin for direction bit 1
    * @param in2_pin   GPIO pin for direction bit 2
    */
-  DRV8871(uint8_t in1_pin, uint8_t in2_pin);
+  L298N(int pi, uint8_t in1_pin, uint8_t in2_pin);
 
   /**
    * @brief Set motor speed
@@ -33,11 +32,12 @@ public:
   void coast();
 
 private:
+  int m_PI;
   uint8_t m_in1_pin, m_in2_pin;
 
   // disable copy
-  DRV8871(const DRV8871&) = delete;
-  DRV8871& operator=(const DRV8871&) = delete;
+  L298N(const L298N&) = delete;
+  L298N& operator=(const L298N&) = delete;
 };
 
-#endif // DRV8871_H
+#endif // L298N_H

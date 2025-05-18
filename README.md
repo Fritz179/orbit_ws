@@ -463,8 +463,8 @@ export ROS_IP=zero.local
 source /opt/ros/noetic/setup.bash
 cd bb8_ws
 source devel/setup.bash
-sudo killall pigpiod
-rosrun bb8_zero bb8_zero_node
+sudo killall     pigpiod
+rosrun bb8_zero bb8_zero
 
 ![Pi zero W Pinout](imgs/pi_zero_w_pinout.png)
 ![Pi 4b Pinout](imgs/pi_4b_pinout.png)
@@ -590,3 +590,10 @@ Initiating shutdown!
 [playbag-6] killing on exit
 
 roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Downloads/b3-2016-02-02-13-32-01.bag
+
+x11vnc -display :0 \
+       -auth /run/user/130/gdm/Xauthority \
+       -rfbauth ~/.vnc/passwd \
+       -forever -shared -noxdamage -xkb -clipboard
+
+       x11vnc -display :0 -auth /run/user/130/gdm/Xauthority  -rfbauth ~/.vnc/passwd -forever -shared -noxdamage -xkb

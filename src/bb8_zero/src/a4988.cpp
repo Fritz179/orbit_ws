@@ -1,5 +1,5 @@
 #include "a4988.h"
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 #include <unistd.h>  // for gpioDelay
 #include <vector>
 

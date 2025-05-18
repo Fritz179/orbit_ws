@@ -4,19 +4,22 @@
 #include <cmath>
 
 NodeZero* node;
-const int MOTOR_SPEED = 500;
+const int MOTOR_SPEED = 500000;
 
-NodeZero::NodeZero() : m_speed_left(0), m_speed_right(0), 
+NodeZero::NodeZero(int pi) : m_speed_left(0), m_speed_right(0), m_PI(pi), 
     // Create PID controllers for each motor (tune gains as needed)
     pid_left(1.0, 0.0, 0.0),
     pid_right(1.0, 0.0, 0.0),    
 
-    // DRV8871(    in1_pin, in2_pin);
-    m_left_driver( 20,      21),
-    m_right_driver(19,      26),
+    // L298N(          in1_pin, in2_pin);
+    m_left_driver( pi, 20,      21),
+    m_right_driver(pi, 19,      26),
 
-    // ATD5833(    step_pin, dir_pin, enable_pin, ms1_pin, ms2_pin) ls_left, ls_right, max_steps
-    m_head(ATD5833(7,        8,       25,         24,      23),     15,      14,       555)
+    m_ls_left_cb_id(0),
+    m_ls_right_cb_id(0),
+
+    // ATD5833(            step_pin, dir_pin, ms1_pin, ms2_pin) ls_left, ls_right, max_steps
+    m_head(pi, ATD5833(pi, 7,        8,       24,      23),     15,      14,       555)
 
 {
     // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
@@ -54,9 +57,12 @@ void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed_left = (int16_t)(msg->linear.x * 255.0 / 5.0);
     m_speed_right = (int16_t)(msg->linear.y * 255.0 / 5.0);
 
+    ROS_INFO("Setting speed to: left: %d, right: %d", m_speed_left, m_speed_right);
+
     m_left_driver.setSpeed(m_speed_left);
     m_right_driver.setSpeed(m_speed_right);
 
+    print_state();
     return;
 }
 
@@ -81,34 +87,51 @@ void NodeZero::cmd_head_calibrate_callback_impl() {
     int left = m_head.ls_left;
     int right = m_head.ls_right;
 
-    gpioSetISRFunc(left, RISING_EDGE, 0, NULL);
-    gpioSetISRFunc(right, RISING_EDGE, 0, NULL);
+    callback_cancel(m_ls_left_cb_id);
+    callback_cancel(m_ls_right_cb_id);
+    ROS_INFO("ISRF Removed");
 
     // Go left
-    while (!gpioRead(left)) {
-        m_head.stepper_driver.step_sync(-1, MOTOR_SPEED);
+    while (!gpio_read(m_PI, left)) {
+        ROS_INFO("Stepping left, %d", gpio_read(m_PI, left));
+
+        m_head.stepper_driver.setDirection(false);
+        m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
     }
+    ROS_INFO("Left Reached");
+
 
     m_head.stepper_driver.setMicrostepMode(ATD5833::MicrostepMode::SIXTEENTH);
     int count = 0;
 
+    ROS_INFO("Going Right");
+
+
     // Go right and count
-    while (!gpioRead(right)) {
+    while (!gpio_read(m_PI, right)) {
+        ROS_INFO("Stepping right, %d", gpio_read(m_PI, right));
+
+        m_head.stepper_driver.setDirection(true);
         m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
         count++;
     }
 
+    ROS_INFO("Gone Right");
+
     // Exit limit zone
-    while (gpioRead(right)) {
-        m_head.stepper_driver.step_sync(-1, MOTOR_SPEED);
+    while (gpio_read(m_PI, right)) {
+    ROS_INFO("restepping Right, %d", gpio_read(m_PI, right));
+
+        m_head.stepper_driver.setDirection(false);
+        m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
     }
 
     ROS_INFO("Motor step count: %d, please update setting", count);
     m_head.state = Head::State::HOAMING;
     m_head.max_steps = count;
 
-    gpioSetISRFunc(left, RISING_EDGE, 0, limit_switch_callback);
-    gpioSetISRFunc(right, RISING_EDGE, 0, limit_switch_callback);
+    callback(m_PI, left, RISING_EDGE, limit_switch_callback);
+    callback(m_PI, right, RISING_EDGE, limit_switch_callback);
     
     print_state();
 }
@@ -119,6 +142,9 @@ void NodeZero::update_head() {
 
     int diff = m_head.desired_steps - m_head.current_steps;
     if (!diff) return;
+
+    m_head.stepper_driver.setDirection(diff > 0);
+    if (diff < 0) diff = -diff;
 
     m_head.stepper_driver.step_async(diff / m_head.stepper_driver.getMicrostepSize(), MOTOR_SPEED);
     m_head.current_steps += diff;
@@ -134,7 +160,7 @@ void NodeZero::limit_switch_callback_impl(int pin, int edge, uint32_t tick) {
     m_head.desired_steps = left ? 10 : m_head.max_steps - 10;
 }
 
-void limit_switch_callback(int pin, int edge, uint32_t tick) {
+void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick) {
     node->limit_switch_callback_impl(pin, edge, tick);
 }
 
