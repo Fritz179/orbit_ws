@@ -45,10 +45,10 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
 
     ROS_INFO("ID: %d", m_head.servo_driver.get_ID());
     
-    for (int i = 0; i < 1000; i++) {
-        ROS_INFO("Pos %d: %d", i, m_head.servo_driver.get_position());
-        time_sleep(0.01);
-    }
+    // for (int i = 0; i < 1000; i++) {
+    //     ROS_INFO("Pos %d: %d", i, m_head.servo_driver.get_position());
+    //     time_sleep(0.01);
+    // }
 
     // cmd_head_calibrate_callback_impl();
     callback(m_PI, m_head.ls_left, RISING_EDGE, limit_switch_callback);
