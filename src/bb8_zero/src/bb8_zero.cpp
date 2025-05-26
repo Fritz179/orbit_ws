@@ -4,9 +4,10 @@
 #include <cmath>
 
 NodeZero* node;
-const int MOTOR_SPEED = 500000;
+const int MOTOR_SPEED = 500;
+  
 
-NodeZero::NodeZero(int pi) : m_speed_left(0), m_speed_right(0), m_PI(pi), 
+NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI(pi), 
     // Create PID controllers for each motor (tune gains as needed)
     pid_left(1.0, 0.0, 0.0),
     pid_right(1.0, 0.0, 0.0),    
@@ -18,8 +19,8 @@ NodeZero::NodeZero(int pi) : m_speed_left(0), m_speed_right(0), m_PI(pi),
     m_ls_left_cb_id(0),
     m_ls_right_cb_id(0),
 
-    // ATD5833(            step_pin, dir_pin, ms1_pin, ms2_pin) ls_left, ls_right, max_steps
-    m_head(pi, ATD5833(pi, 8,        7,       24,      23),     15,      14,       555)
+    //                               ls_left, ls_right, max_steps
+    m_head(pi, LX16A(pi, handle, 1),     15,      14,       555)
 
 {
     // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
@@ -31,12 +32,25 @@ NodeZero::NodeZero(int pi) : m_speed_left(0), m_speed_right(0), m_PI(pi),
 
     node = this;
 
-    cmd_head_calibrate_callback_impl();
+    m_head.servo_driver.set_speed(0);
 
-    ros::Timer timer = nh.createTimer(ros::Duration(0.02),   // 50 Hz
-    [&](const ros::TimerEvent&){  
-        update_head();
-    });
+
+
+    double temp = m_head.servo_driver.get_voltage();
+    ROS_INFO("Voltage: %f", temp);
+
+    ROS_INFO("ID: %d", m_head.servo_driver.get_ID());
+    
+    for (int i = 0; i < 1000; i++) {
+        ROS_INFO("Pos %d: %d", i, m_head.servo_driver.get_position());
+        time_sleep(0.01);
+    }
+
+    // cmd_head_calibrate_callback_impl();
+    callback(m_PI, m_head.ls_left, RISING_EDGE, limit_switch_callback);
+    callback(m_PI, m_head.ls_right, RISING_EDGE, limit_switch_callback);
+
+    m_head_timer = nh.createTimer(ros::Duration(0.02), &NodeZero::update_head, this);
 
     nh.createTimer(ros::Duration(0.02),   // 50 Hz
     [&](const ros::TimerEvent&){  
@@ -89,46 +103,46 @@ void NodeZero::cmd_head_calibrate_callback_impl() {
 
     callback_cancel(m_ls_left_cb_id);
     callback_cancel(m_ls_right_cb_id);
-    ROS_INFO("ISRF Removed");
+    ROS_INFO("Going for left limit switch...");
 
     // Go left
     while (!gpio_read(m_PI, left)) {
-        ROS_INFO("Stepping left, %d", gpio_read(m_PI, left));
+        // ROS_INFO("Stepping left, %d", gpio_read(m_PI, left));
 
-        m_head.stepper_driver.setDirection(false);
-        m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
+        // m_head.stepper_driver.setDirection(false);
+        // m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
     }
-    ROS_INFO("Left Reached");
 
-
-    m_head.stepper_driver.setMicrostepMode(ATD5833::MicrostepMode::SIXTEENTH);
+    // m_head.stepper_driver.setMicrostepMode(ATD5833::MicrostepMode::SIXTEENTH);
     int count = 0;
 
-    ROS_INFO("Going Right");
-
+    ROS_INFO("Going for right limit switch...");
 
     // Go right and count
     while (!gpio_read(m_PI, right)) {
-        ROS_INFO("Stepping right, %d", gpio_read(m_PI, right));
+        // ROS_INFO("Stepping right, %d", gpio_read(m_PI, right));
 
-        m_head.stepper_driver.setDirection(true);
-        m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
+        // m_head.stepper_driver.setDirection(true);
+        // m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
         count++;
     }
 
-    ROS_INFO("Gone Right");
+    ROS_INFO("Exiting right limit switch...");
 
     // Exit limit zone
     while (gpio_read(m_PI, right)) {
-    ROS_INFO("restepping Right, %d", gpio_read(m_PI, right));
+        // ROS_INFO("restepping Right, %d", gpio_read(m_PI, right));
 
-        m_head.stepper_driver.setDirection(false);
-        m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
+        // m_head.stepper_driver.setDirection(false);
+        // m_head.stepper_driver.step_sync(1, MOTOR_SPEED);
     }
 
-    ROS_INFO("Motor step count: %d, please update setting", count);
+    ROS_INFO("Motor calibration step count: %d, please update setting", count);
+
     m_head.state = Head::State::HOAMING;
     m_head.max_steps = count;
+    m_head.current_steps = count;
+    m_head.desired_steps = count / 2;
 
     callback(m_PI, left, RISING_EDGE, limit_switch_callback);
     callback(m_PI, right, RISING_EDGE, limit_switch_callback);
@@ -136,18 +150,26 @@ void NodeZero::cmd_head_calibrate_callback_impl() {
     print_state();
 }
 
-void NodeZero::update_head() {
+void NodeZero::update_head(const ros::TimerEvent&) {
+    // ROS_INFO("Head update, stepping? %d", m_head.stepper_driver.is_stepping());
+
     if (m_head.state == Head::State::CALIBRATING) return;
-    if (m_head.stepper_driver.is_stepping()) return;
+    // if (m_head.stepper_driver.is_stepping()) return;
 
     int diff = m_head.desired_steps - m_head.current_steps;
     if (!diff) return;
 
-    m_head.stepper_driver.setDirection(diff > 0);
+    if (diff > 2000) diff = 2000;
+    if (diff < -2000) diff = -2000;
+
+    ROS_INFO("Diff: %d", diff);
+
+    m_head.current_steps += diff;
+
+    // m_head.stepper_driver.setDirection(diff > 0);
     if (diff < 0) diff = -diff;
 
-    m_head.stepper_driver.step_async(diff / m_head.stepper_driver.getMicrostepSize(), MOTOR_SPEED);
-    m_head.current_steps += diff;
+    // m_head.stepper_driver.step_async(diff / m_head.stepper_driver.getMicrostepSize(), MOTOR_SPEED);
     print_state();
 }
 
@@ -155,9 +177,18 @@ void NodeZero::limit_switch_callback_impl(int pin, int edge, uint32_t tick) {
     bool left = pin == m_head.ls_left;
 
     ROS_ERROR("%s LIMIT SWITCH ACTIVATED", left ? "LEFT" : "RIGHT");
+    wave_clear(m_PI);
+    wave_tx_stop(m_PI);
 
     m_head.current_steps = left ? 0 : m_head.max_steps;
     m_head.desired_steps = left ? 10 : m_head.max_steps - 10;
+
+    // If the other is also activated
+    if (gpio_read(m_PI, left ? m_head.ls_right : m_head.ls_left)) {
+        m_head.servo_driver.set_speed(0);
+    } else {
+        m_head.servo_driver.set_speed(left ? 1000 : -1000);
+    }
 }
 
 void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick) {

@@ -1,4 +1,6 @@
 #include "atd5833.h"
+#include "ros/ros.h"
+
 #include <unistd.h>  // for delay
 #include <vector>
 
@@ -87,6 +89,8 @@ void ATD5833::step_sync(uint32_t steps, uint32_t period_us)
 
 void ATD5833::step_async(uint32_t steps, uint32_t period_us)
 {
+  ROS_INFO("Creating vawe for steps: %d, period_us: %d", steps, period_us);
+
   wave_clear(m_PI);
 
   std::vector<gpioPulse_t> pulses;
@@ -101,6 +105,8 @@ void ATD5833::step_async(uint32_t steps, uint32_t period_us)
   wave_add_generic(m_PI, pulses.size(), pulses.data());
   int wid = wave_create(m_PI);
   wave_send_once(m_PI, wid);   // returns straight away
+
+  ROS_INFO("Wave sent! id: %d", wid);
 }
 
 bool ATD5833::is_stepping() {

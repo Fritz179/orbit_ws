@@ -5,7 +5,7 @@
 #include "nav_msgs/Odometry.h"
 
 #include "l298n.h"
-#include "atd5833.h"
+#include "lx16a.h"
 #include <pigpiod_if2.h>
 
 #include <sstream>
@@ -36,7 +36,7 @@ public:
             HOAMING,
         };
 
-        ATD5833 stepper_driver;
+        LX16A servo_driver;
 
         uint8_t  ls_left;
         uint8_t  ls_right;
@@ -45,8 +45,8 @@ public:
         uint32_t desired_steps;
         State    state;
 
-        Head(int pi, ATD5833 stepper, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
-    :   stepper_driver(stepper),
+        Head(int pi, LX16A servo, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
+    :   servo_driver(servo),
         ls_left(ls_left),
         ls_right(ls_right),
         max_steps(max_steps),
@@ -63,7 +63,7 @@ public:
     };
 
 
-    NodeZero(int);
+    NodeZero(int pi, int handle);
     void spin();
 
     void limit_switch_callback_impl(int pin, int edge, uint32_t tick);
@@ -110,6 +110,8 @@ private:
     PID pid_left;
     PID pid_right;
 
-    void update_head();
+    ros::Timer m_head_timer;
+    void update_head(const ros::TimerEvent&);
+    
     void update_PID();
 };
