@@ -6,13 +6,13 @@ int main(int argc, char** argv) {
 
     int pi = pigpio_start(NULL, NULL); 
     if (pi < 0) {
-        ROS_ERROR("pigpio init failed: %d", pi);
+        ROS_ERROR("pigpio init failed: %s", pigpio_error(pi));
         return 1;
     }
 
     int handle = serial_open(pi, (char*)"/dev/ttyUSB0", 115200, 0);
     if (handle < 0) {
-        ROS_ERROR("pigpio handle init failed: %d", handle);
+        ROS_ERROR("pigpio handle init failed: %s", pigpio_error(handle));
         return 1;
     }
 

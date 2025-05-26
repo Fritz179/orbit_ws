@@ -20,9 +20,13 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     m_ls_right_cb_id(0),
 
     //                               ls_left, ls_right, max_steps
-    m_head(pi, LX16A(pi, handle, 1),     15,      14,       555)
+    m_head(pi, LX16A(pi, handle, 1),     27,      4,       555)
 
 {
+    // Limit switch hack
+    gpio_write(pi, 22, 0); // ls_left =>  3.3V,      22 = GND, 27 = S
+    gpio_write(pi, 17, 1); // ls_right => 17 = 3.3V, GND,      4 = S
+
     // m_base_state_pub = nh.advertise<std_msgs::Float32>("base_state", 10);
     m_cmd_vel_sub = nh.subscribe("cmd_vel", 10, &NodeZero::cmd_vel_callback, this);
     m_cmd_head_sub = nh.subscribe("cmd_head", 10, &NodeZero::cmd_head_callback, this);
