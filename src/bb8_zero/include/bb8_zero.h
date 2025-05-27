@@ -1,4 +1,4 @@
-#include "std_msgs/Float32.h"
+#include "std_msgs/Int32.h"
 #include "std_msgs/Empty.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
@@ -28,31 +28,17 @@ class NodeZero
 {
 public:
     struct Head {
-        enum State {
-            // Go to both limit switches to calibrate position and step range
-            CALIBRATING,
-
-            // try to make current_steps = desired_steps
-            HOAMING,
-        };
-
         LX16A servo_driver;
 
         uint8_t  ls_left;
         uint8_t  ls_right;
-        uint32_t max_steps;
-        uint32_t current_steps;
-        uint32_t desired_steps;
-        State    state;
+        int32_t  desired_steps;
 
-        Head(int pi, LX16A servo, uint8_t ls_left, uint8_t ls_right, uint32_t max_steps)
+        Head(int pi, LX16A servo, uint8_t ls_left, uint8_t ls_right)
     :   servo_driver(servo),
         ls_left(ls_left),
         ls_right(ls_right),
-        max_steps(max_steps),
-        current_steps(max_steps / 2),
-        desired_steps(max_steps / 2),
-        state(State::CALIBRATING)
+        desired_steps(0)
         {
             // configure limit‐switch pins as inputs with pull-ups
             set_mode(pi, ls_left,  PI_INPUT);
@@ -90,13 +76,8 @@ private:
     
     // set wheel deisred position, -1 = Full Left, 1 = Full Right
     ros::Subscriber m_cmd_head_sub;
-    void cmd_head_callback(const std_msgs::Float32::ConstPtr& msg);
+    void cmd_head_callback(const std_msgs::Int32::ConstPtr& msg);
     
-    // Start head calibration
-    ros::Subscriber m_cmd_head_calibrate_sub;
-    void cmd_head_calibrate_callback(const std_msgs::Empty::ConstPtr& msg);
-    void cmd_head_calibrate_callback_impl();
-
     // Subscribe ekf
     ros::Subscriber m_accel_filtered_sub;
     void accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
