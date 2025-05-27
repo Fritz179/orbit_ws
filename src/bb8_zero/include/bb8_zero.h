@@ -94,5 +94,6 @@ private:
     ros::Timer m_head_timer;
     void update_head(const ros::TimerEvent&);
     
-    void update_PID();
+    ros::Timer m_pid_timer;
+    void update_PID(const ros::TimerEvent&);
 };

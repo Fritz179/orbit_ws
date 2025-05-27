@@ -46,15 +46,18 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     callback(m_PI, m_head.ls_right, RISING_EDGE, limit_switch_callback);
 
     m_head_timer = nh.createTimer(ros::Duration(0.02), &NodeZero::update_head, this);
-
-    nh.createTimer(ros::Duration(0.02),   // 50 Hz
-    [&](const ros::TimerEvent&){  
-        // update_PID();
-    });
+    m_pid_timer = nh.createTimer(ros::Duration(0.1), &NodeZero::update_PID, this);
 }
 
 void NodeZero::print_state() {
     ROS_INFO("Motor speed l: %d, r: %d. Desired steps: %d.", m_speed_left, m_speed_right, m_head.desired_steps);
+
+    ROS_INFO("Pose Orinetation x: %f, y: %f, z: %f, w: %f", 
+        m_odom.pose.pose.orientation.x,
+        m_odom.pose.pose.orientation.y,
+        m_odom.pose.pose.orientation.z,
+        m_odom.pose.pose.orientation.w
+    );
 }
 
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
@@ -126,8 +129,6 @@ void NodeZero::odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& ms
         msg->pose.pose.position.y,
         msg->pose.pose.position.z
     );
-
-    
 }
 
 void NodeZero::accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg){
@@ -154,7 +155,7 @@ void NodeZero::accel_filtered_callback(const geometry_msgs::AccelWithCovarianceS
     
 }
 
-void NodeZero::update_PID(){
+void NodeZero::update_PID(const ros::TimerEvent&) {
     // Estimate forward velocity magnitude (assumes forward is along x)
     double forward_velocity = std::sqrt(
         m_accel.accel.accel.linear.x * m_accel.accel.accel.linear.x + 
