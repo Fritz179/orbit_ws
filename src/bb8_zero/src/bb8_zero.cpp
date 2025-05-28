@@ -12,6 +12,13 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     pid_left(1.0, 0.0, 0.0),
     pid_right(1.0, 0.0, 0.0),    
 
+    // Constants for PID tuning
+    // const float Kp = 1.0;
+    // const float Ki = 0.1;
+    // const float Kd = 0.05;
+    // float previous_error = 0.0;
+    // float integral = 0.0;
+
     // L298N(          in1_pin, in2_pin);
     m_left_driver( pi, 20,      21),
     m_right_driver(pi, 19,      26),
@@ -46,28 +53,27 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     callback(m_PI, m_head.ls_right, RISING_EDGE, limit_switch_callback);
 
     m_head_timer = nh.createTimer(ros::Duration(0.02), &NodeZero::update_head, this);
-    m_pid_timer = nh.createTimer(ros::Duration(0.1), &NodeZero::update_PID, this);
+    m_pid_timer = nh.createTimer(ros::Duration(0.5), &NodeZero::update_PID, this);
 }
 
 void NodeZero::print_state() {
-    ROS_INFO("Motor speed l: %d, r: %d. Desired steps: %d.", m_speed_left, m_speed_right, m_head.desired_steps);
-
-    ROS_INFO("Pose Orinetation x: %f, y: %f, z: %f, w: %f", 
-        m_odom.pose.pose.orientation.x,
-        m_odom.pose.pose.orientation.y,
-        m_odom.pose.pose.orientation.z,
-        m_odom.pose.pose.orientation.w
-    );
+    ROS_INFO("Motor l: %d, r: %d. Servo: %d. Yaw %f", m_speed_left, m_speed_right, m_head.desired_steps, m_odom.pose.pose.orientation.z);
 }
 
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed_left = (int16_t)(msg->linear.x * 255.0 / 5.0);
     m_speed_right = (int16_t)(msg->linear.y * 255.0 / 5.0);
 
+    // Base motor speed
+    // const int base_speed = (int16_t)(msg->linear.x * 255.0 / 5.0);
+    // // Base motor direction
+    // double target_yaw = msg->angular.z;  // Straight line
+    // yaw_angle = m_odom.pose.pose.orientation.z,
+
     ROS_INFO("Setting speed to: left: %d, right: %d", m_speed_left, m_speed_right);
 
-    m_left_driver.setSpeed(m_speed_left);
-    m_right_driver.setSpeed(m_speed_right);
+    // m_left_driver.setSpeed(m_speed_left);
+    // m_right_driver.setSpeed(m_speed_right);
 
     print_state();
     return;
@@ -117,41 +123,41 @@ void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick) {
 
 void NodeZero::odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg){
     m_odom = *msg;
-    ROS_INFO("Pose Orinetation x: %f, y: %f, z: %f, w: %f", 
-        msg->pose.pose.orientation.x,
-        msg->pose.pose.orientation.y,
-        msg->pose.pose.orientation.z,
-        msg->pose.pose.orientation.w
-    );
+    // ROS_INFO("Pose Orinetation x: %f, y: %f, z: %f, w: %f", 
+    //     msg->pose.pose.orientation.x,
+    //     msg->pose.pose.orientation.y,
+    //     msg->pose.pose.orientation.z,
+    //     msg->pose.pose.orientation.w
+    // );
 
-    ROS_INFO("Pose Position x: %f, y: %f, z: %f", 
-        msg->pose.pose.position.x,
-        msg->pose.pose.position.y,
-        msg->pose.pose.position.z
-    );
+    // ROS_INFO("Pose Position x: %f, y: %f, z: %f", 
+    //     msg->pose.pose.position.x,
+    //     msg->pose.pose.position.y,
+    //     msg->pose.pose.position.z
+    // );
 }
 
 void NodeZero::accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg){
     m_accel = *msg;
-    ROS_INFO("Accel Angular x: %f, y: %f, z: %f", 
-        msg->accel.accel.angular.x,
-        msg->accel.accel.angular.y,
-        msg->accel.accel.angular.z);
+    // ROS_INFO("Accel Angular x: %f, y: %f, z: %f", 
+    //     msg->accel.accel.angular.x,
+    //     msg->accel.accel.angular.y,
+    //     msg->accel.accel.angular.z);
 
-    ROS_INFO("Accel Linear x: %f, y: %f, z: %f", 
-        msg->accel.accel.linear.x,
-        msg->accel.accel.linear.y,
-        msg->accel.accel.linear.z);
+    // ROS_INFO("Accel Linear x: %f, y: %f, z: %f", 
+    //     msg->accel.accel.linear.x,
+    //     msg->accel.accel.linear.y,
+    //     msg->accel.accel.linear.z);
 
-    double xl = msg->accel.accel.linear.x;
-    double yl = msg->accel.accel.linear.y;
-    double zl = msg->accel.accel.linear.z;
-    double xa = msg->accel.accel.angular.x; 
-    double ya = msg->accel.accel.angular.y;
-    double za = msg->accel.accel.angular.z;
+    // double xl = msg->accel.accel.linear.x;
+    // double yl = msg->accel.accel.linear.y;
+    // double zl = msg->accel.accel.linear.z;
+    // double xa = msg->accel.accel.angular.x; 
+    // double ya = msg->accel.accel.angular.y;
+    // double za = msg->accel.accel.angular.z;
 
-    double absolut_velocity_linear = std::sqrt(xl*xl + yl *yl);
-    ROS_INFO("Absolute velocity: %f", absolut_velocity_linear);
+    // double absolut_velocity_linear = std::sqrt(xl*xl + yl *yl);
+    // ROS_INFO("Absolute velocity: %f", absolut_velocity_linear);
     
 }
 
@@ -201,3 +207,26 @@ double PID::update(double target, double current) {
 
     return output;
 }
+
+// double PID::Motor_update(double yaw_angle, double d_t){
+//     // Optional trims for motor differences
+//     const float left_trim = 1.00;   // 100% power
+//     const float right_trim = 1.00;  // 100% power
+
+//     // Compute error
+//     float error = target_yaw - yaw_angle;
+
+//     // PID terms
+//     integral += error * d_t;
+//     float derivative = (error - previous_error) / d_t;
+//     float output = Kp * error + Ki * integral + Kd * derivative;
+//     previous_error = error;
+
+//     // Compute motor speeds
+//     int left_motor_speed = clamp(static_cast<int>((base_speed + output) * left_trim), 0, 255);
+//     int right_motor_speed = clamp(static_cast<int>((base_speed - output) * right_trim), 0, 255);
+
+//     // Apply motor speeds (replace with your actual motor control functions)
+//     m_left_driver.setSpeed(left_motor_speed);
+//     m_right_driver.setSpeed(right_motor_speed);;
+// }

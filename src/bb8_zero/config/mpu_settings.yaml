@@ -12,4 +12,12 @@ frame_id: "sphere_imu"
 
 # Offsets to fix wrong values caused by misalignment
 # Sequence is (ax, ay, az, gx, gy, gz) (default: [0, 0, 0, 0, 0, 0])
-# axes_offsets: [-1514, -1428, 1202, 109, 12, 17]
+axes_offsets: [1165, 1950, 897, 112, -22, 60]
+
+
+# [INFO] [1748359627.933288091]: Final offset of Accel X axis = 1165
+# [INFO] [1748359627.933444202]: Final offset of Accel Y axis = 1950
+# [INFO] [1748359627.933521832]: Final offset of Accel Z axis = 897
+# [INFO] [1748359627.933572369]: Final offset of Gyro  X axis = 112
+# [INFO] [1748359627.933619684]: Final offset of Gyro  Y axis = -22
+# [INFO] [1748359627.933681128]: Final offset of Gyro  Z axis = 60

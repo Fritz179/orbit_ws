@@ -18,7 +18,9 @@ class PID {
             : kp_(kp), ki_(ki), kd_(kd), prev_error_(0.0), integral_(0.0), prev_time_(ros::Time::now()) {}
     
         double update(double target, double current);
+        // double Motor_update(double yaw_angle, double d_t);
     private:
+        // int base_speed;
         double kp_, ki_, kd_;
         double prev_error_, integral_;
         ros::Time prev_time_;

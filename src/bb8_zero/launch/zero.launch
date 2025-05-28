@@ -1,12 +1,17 @@
 <launch>
 
-  <!-- IMU  -->
-  <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
-    <rosparam file="$(find bb8_zero)/config/mpu_settings.yaml" command="load"/>
-    <remap from="imu/data_raw" to="sphere_imu"/>
-  </node>
+    <!-- IMU  -->
+    <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
+        <rosparam file="$(find bb8_zero)/config/mpu_settings.yaml" command="load"/>
+    </node>
 
-  <!-- odometry -->
+    <!-- Madgwick filter -->
+    <node name="imu_filter_node" pkg="imu_filter_madgwick" type="imu_filter_node" output="screen">
+        <rosparam file="$(find bb8_zero)/config/madgwick_filter_params.yaml" command="load"/>
+        <remap from="/imu/data" to="/sphere_imu"/>
+    </node>
+
+    <!-- odometry -->
     <node pkg="robot_localization" type="ekf_localization_node"
             name="ekf_localization" clear_params="true" output="screen">
 
