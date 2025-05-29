@@ -30,7 +30,7 @@ add_executable(${PROJECT_NAME}
   src/bb8_zero_node.cpp 
   src/bb8_zero.cpp 
   src/l298n.cpp 
-  src/atd5833.cpp
+  src/lx16a.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
