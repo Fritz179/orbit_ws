@@ -7,9 +7,10 @@ public:
     BB8();
     void spin();
 
-private:
     ros::NodeHandle nh;
 
+
+private:
     // set head tilt
     ros::Publisher m_head_tilt_pub;
     ros::Subscriber m_head_imu_sub;

@@ -10,6 +10,13 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(PkgConfig REQUIRED)
 
+find_library(WS2811_LIBRARY
+             NAMES ws2811
+             HINTS /usr/local/lib /lib /usr/lib
+             # You might need PATH_SUFFIXES on some systems if lib is in a multiarch dir
+             # PATH_SUFFIXES arm-linux-gnueabihf aarch64-linux-gnu
+)
+
 catkin_package(
    INCLUDE_DIRS include
 )
@@ -17,6 +24,8 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  /usr/local/include
+  /usr/local/include/ws2811
 )
 
 add_executable(${PROJECT_NAME}
@@ -26,6 +35,7 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
+  ${WS2811_LIBRARY}
 )
 
 install(TARGETS ${PROJECT_NAME}
