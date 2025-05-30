@@ -1,20 +1,13 @@
-#include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "bb8.h"
 
-int main(int argc, char **argv) {
-    ros::init(argc, argv, "bb8_node");
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "node_bb8");
 
-    ros::NodeHandle nh;
-    ros::Publisher pub = nh.advertise<std_msgs::String>("chatter", 10);
-    ros::Rate rate(1);
+    ROS_INFO("BB8 Node asdfasdf");
 
-    while (ros::ok()) {
-        std_msgs::String msg;
-        msg.data = "hello there";
-        pub.publish(msg);
-        ros::spinOnce();
-        rate.sleep();
-    }
+    BB8 node;
+
+    ros::spin();
 
     return 0;
 }
