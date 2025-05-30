@@ -463,7 +463,7 @@ export ROS_IP=zero.local
 source /opt/ros/noetic/setup.bash
 cd bb8_ws
 source devel/setup.bash
-sudo killall     pigpiod
+sudo killall pigpiod
 rosrun bb8_zero bb8_zero
 
 ![Pi zero W Pinout](imgs/pi_zero_w_pinout.png)
@@ -579,14 +579,41 @@ speaker-test -t wav -c 2
 # God forgive me for what I am about to do
 touch src/cartographer/cartographer_ros/COLCON_IGNORE
 colcon build --packages-select cartographer_ros_msgs --build-base colcon_build
+
+colcon build --packages-select ros1_bridge --cmake-force-configure --build-base colcon_build    
+
+
+sudo systemd-nspawn -D /media/struct/a57fe4be-f8f5-47ba-a9cb-198aa9a5c682/ --boot --machine ubu20
+
+
+https://www.handsontec.com/dataspecs/17HS4401S.pdf
+https://de.aliexpress.com/item/1005004614528741.html
+
+https://forum.arduino.cc/t/how-to-measure-and-set-the-correct-current-limit-on-stepper-motor-driver/588955  
+
+" Be VERY CAREFUL never to disconnect the wires between the motor and the stepper driver 
+    while the driver is powered up. The driver will be instantly destroyed. "
+
+                                                                Robin2, Apr 2019
+https://drive.google.com/drive/folders/1gnNBD1z_hAVE9SsqzKxrgG_n-57FNf3M
+
+
+
+
+sudo nano /etc/resolv.conf
+Remove any existing nameserver lines and add these:
+
+nameserver 8.8.8.8
+nameserver 1.1.1.1
+
 colcon build --packages-select ros1_bridge --cmake-force-configure --build-base colcon_build
 
 qt.qpa.xcb: XKeyboard extension not present on the X server
-================================================================================REQUIRED process [rviz-5] has died!
+
 process has died [pid 2621, exit code -11, cmd /opt/ros/noetic/lib/rviz/rviz -d /home/ros/bb8_ws/src/cartographer/cartographer_ros/cartographer_ros/configuration_files/demo_3d.rviz __name:=rviz __log:=/home/ros/.ros/log/0343591a-301a-11f0-9d08-ed3397efa0af/rviz-5.log].
 log file: /home/ros/.ros/log/0343591a-301a-11f0-9d08-ed3397efa0af/rviz-5*.log
 Initiating shutdown!
-================================================================================
+
 [playbag-6] killing on exit
 
 roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Downloads/b3-2016-02-02-13-32-01.bag

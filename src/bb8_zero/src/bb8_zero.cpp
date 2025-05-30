@@ -4,20 +4,12 @@
 #include <cmath>
 
 NodeZero* node;
-const int MOTOR_SPEED = 500;
-  
 
-NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI(pi), 
-    // Create PID controllers for each motor (tune gains as needed)
-    pid_left(1.0, 0.0, 0.0),
-    pid_right(1.0, 0.0, 0.0),    
-
-    // Constants for PID tuning
-    // const float Kp = 1.0;
-    // const float Ki = 0.1;
-    // const float Kd = 0.05;
-    // float previous_error = 0.0;
-    // float integral = 0.0;
+NodeZero::NodeZero(int pi, int handle) : 
+    m_enabled(false), m_head_enabled(true),
+    m_heading(0), m_odom(), m_accel(),
+    m_speed(0), m_speed_left(0), m_speed_right(0), 
+    m_PI(pi), 
 
     // L298N(          in1_pin, in2_pin);
     m_left_driver( pi, 20,      21),
@@ -34,7 +26,8 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     gpio_write(pi, 22, 0); // ls_left =>  3.3V,      22 = GND, 27 = S
     gpio_write(pi, 17, 1); // ls_right => 17 = 3.3V, GND,      4 = S
 
-    // m_base_state_pub = nh.advertise<std_msgs::Int32>("base_state", 10);
+    m_enable_sub = nh.subscribe("enable", 10, &NodeZero::enable_callback, this);
+    m_enable_head_sub = nh.subscribe("enable_head", 10, &NodeZero::enable_head_callback, this);
     m_cmd_vel_sub = nh.subscribe("cmd_vel", 10, &NodeZero::cmd_vel_callback, this);
     m_cmd_head_sub = nh.subscribe("cmd_head", 10, &NodeZero::cmd_head_callback, this);
     m_accel_filtered_sub = nh.subscribe("accel/filtered", 10, &NodeZero::accel_filtered_callback, this);
@@ -42,7 +35,9 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
 
     m_pid_heading_setpoint_pub = nh.advertise<std_msgs::Float64>("pid_heading/setpoint", 10);
     m_pid_heading_state_pub = nh.advertise<std_msgs::Float64>("pid_heading/state", 10);
-    m_heading_effort_sub = nh.subscribe("pid_heading/control_effort", 10, &NodeZero::heading_effort_callback, this);
+    m_pid_heading_effort_sub = nh.subscribe("pid_heading/control_effort", 10, &NodeZero::pid_heading_effort_callback, this);
+
+    m_pid_pitch_effort_sub = nh.subscribe("pid_pitch/control_effort", 10, &NodeZero::pid_pitch_effort_callback, this);
 
     node = this;
 
@@ -57,59 +52,123 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     callback(m_PI, m_head.ls_right, RISING_EDGE, limit_switch_callback);
 
     m_head_timer = nh.createTimer(ros::Duration(0.02), &NodeZero::update_head, this);
-    m_pid_timer = nh.createTimer(ros::Duration(0.5), &NodeZero::update_PID, this);
+    m_print_state_timer = nh.createTimer(ros::Duration(0.1), &NodeZero::print_state, this);
+
+    // Send the first setpoint.
+    ros::Rate loop_rate(1);
+    while (m_pid_heading_setpoint_pub.getNumSubscribers() == 0) {
+        ROS_INFO("Waiting for subscribers to %s...", m_pid_heading_setpoint_pub.getTopic().c_str());
+        
+        if (!ros::ok()) {
+            return;
+        }
+
+        loop_rate.sleep();
+    }
+
+    std_msgs::Float64 setpoint;
+    setpoint.data = m_heading;
+    m_pid_heading_setpoint_pub.publish(setpoint);
 }
 
-void NodeZero::print_state() {
-    ROS_INFO("Motor l: %d, r: %d. Servo: %d. Yaw %f", m_speed_left, m_speed_right, m_head.desired_steps, m_odom.pose.pose.orientation.z);
+void NodeZero::print_state(const ros::TimerEvent&) {
+    ROS_INFO("En %d, Head %d, Motor speed: %d, l: %d, r: %d. Servo: %d. Yaw %f", 
+        m_enabled, m_head_enabled, m_speed, m_speed_left, m_speed_right, m_head.desired_steps, m_odom.pose.pose.orientation.z);
+}
+
+void NodeZero::enable_callback(const std_msgs::Bool::ConstPtr& msg) {
+    m_enabled = msg->data;
+
+    if (m_enabled) {
+        m_left_driver.setSpeed(m_speed_left);
+        m_right_driver.setSpeed(m_speed_right);
+    } else {
+        m_left_driver.setSpeed(0);
+        m_right_driver.setSpeed(0);
+    }
+}
+
+void NodeZero::enable_head_callback(const std_msgs::Bool::ConstPtr& msg) {
+    m_head_enabled = msg->data;
+
+    if (!m_head_enabled) {
+        m_head.servo_driver.set_speed(0);
+    }
 }
 
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
     m_speed = (int16_t)(msg->linear.x * 255.0 / 5.0);
 
     if (msg->angular.z) {
-        std_msgs::Float64 setpoint;
-        setpoint.data = m_odom.pose.pose.orientation.z + msg->angular.z;
-        m_pid_heading_setpoint_pub.publish(setpoint);
+        m_heading = m_odom.pose.pose.orientation.z + msg->angular.z;
+
+        m_heading = std::fmod(m_heading + 1, 2) - 1; // Normalize to [-1, 1]
     }
 
-    ROS_INFO("Got cmd_vel: speed: %d, angle: %f", m_speed, msg->angular.z);
+    std_msgs::Float64 setpoint;
+    setpoint.data = m_heading;
+    m_pid_heading_setpoint_pub.publish(setpoint);
 
-    print_state();
+    ROS_INFO("Got cmd_vel: speed: %d, angle: %f", m_speed, msg->angular.z);
 }
 
-void NodeZero::heading_effort_callback(const std_msgs::Float64::ConstPtr& msg) {
+void NodeZero::pid_heading_effort_callback(const std_msgs::Float64::ConstPtr& msg) {
     // ROS_INFO("Heading effort received: %f", msg->data);
 
-    m_speed_left = m_speed + msg->data * m_speed;
-    m_speed_right = m_speed - msg->data * m_speed;
+    m_speed_left = m_speed + (msg->data * 255.0);
+    m_speed_right = m_speed - (msg->data * 255.0);
     
-    m_left_driver.setSpeed(m_speed_left);
-    m_right_driver.setSpeed(m_speed_right);
+    if (m_enabled) {
+        m_left_driver.setSpeed(m_speed_left);
+        m_right_driver.setSpeed(m_speed_right);
+    }
+};
+
+void NodeZero::pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg) {
+    // ROS_INFO("Pitching effort received: %f", msg->data);
+    
+    if (m_enabled && m_head_enabled && m_head.desired_steps == 0) {
+        m_head.servo_driver.set_speed(msg->data * 1000.0);
+    }
 };
 
 
 void NodeZero::cmd_head_callback(const std_msgs::Int32::ConstPtr& msg) {
     m_head.desired_steps = msg->data ;
-
-    print_state();
 }
 
 void NodeZero::update_head(const ros::TimerEvent&) {
-    if (!m_head.desired_steps) {
-        m_head.servo_driver.set_speed(0);
+    if (!m_head.desired_steps || !m_enabled || !m_head_enabled) {
         return;
     };
 
     if (m_head.desired_steps > 0) {
+
+        if (gpio_read(m_PI, m_head.ls_right)) {
+            m_head.desired_steps = 0;
+            m_head.servo_driver.set_speed(0);
+            return;
+        }
+
         m_head.desired_steps--;
         m_head.servo_driver.set_speed(500);
+        
     } else {
+
+        if (gpio_read(m_PI, m_head.ls_left)) {
+            m_head.desired_steps = 0;
+            m_head.servo_driver.set_speed(0);
+            return;
+        }
+
         m_head.servo_driver.set_speed(-500);
         m_head.desired_steps++;
     }
 
-    print_state();
+    // It was the last one
+    if (!m_head.desired_steps) {
+        m_head.servo_driver.set_speed(0);
+    };
 }
 
 void NodeZero::limit_switch_callback_impl(int pin, int edge, uint32_t tick) {
@@ -173,75 +232,4 @@ void NodeZero::accel_filtered_callback(const geometry_msgs::AccelWithCovarianceS
 
     // double absolut_velocity_linear = std::sqrt(xl*xl + yl *yl);
     // ROS_INFO("Absolute velocity: %f", absolut_velocity_linear);
-    
 }
-
-void NodeZero::update_PID(const ros::TimerEvent&) {
-    // Estimate forward velocity magnitude (assumes forward is along x)
-    double forward_velocity = std::sqrt(
-        m_accel.accel.accel.linear.x * m_accel.accel.accel.linear.x + 
-        m_accel.accel.accel.linear.y * m_accel.accel.accel.linear.y
-    );
-
-    // Basic split for left/right current velocity
-    // Positive angular motion: left wheel slower, right wheel faster
-    double angular_component = m_accel.accel.accel.angular.z;
-
-    // Estimate individual wheel velocities from linear and angular components
-    double wheel_base = 0.2;  // Distance between wheels in meters (adjust!)
-    double current_velocity_left = forward_velocity - (angular_component * wheel_base / 2.0);
-    double current_velocity_right = forward_velocity + (angular_component * wheel_base / 2.0);
-
-    // Get PID outputs
-    double control_left = pid_left.update(m_speed_left, current_velocity_left);
-    double control_right = pid_right.update(m_speed_right, current_velocity_right);
-
-    // // Optional: clamp outputs to valid motor range
-    // control_left = std::clamp(control_left, -1.0, 1.0);
-    // control_right = std::clamp(control_right, -1.0, 1.0);
-    
-    // m_left_driver.setSpeed(control_left);
-    // m_right_driver.setSpeed(control_right);
-
-    print_state();
-}
-
-double PID::update(double target, double current) {
-    ros::Time now = ros::Time::now();
-    double dt = (now - prev_time_).toSec();
-    if (dt <= 0.0) dt = 1e-3;
-
-    double error = target - current;
-    integral_ += error * dt;
-    double derivative = (error - prev_error_) / dt;
-
-    double output = kp_ * error + ki_ * integral_ + kd_ * derivative;
-
-    prev_error_ = error;
-    prev_time_ = now;
-
-    return output;
-}
-
-// double PID::Motor_update(double yaw_angle, double d_t){
-//     // Optional trims for motor differences
-//     const float left_trim = 1.00;   // 100% power
-//     const float right_trim = 1.00;  // 100% power
-
-//     // Compute error
-//     float error = target_yaw - yaw_angle;
-
-//     // PID terms
-//     integral += error * d_t;
-//     float derivative = (error - previous_error) / d_t;
-//     float output = Kp * error + Ki * integral + Kd * derivative;
-//     previous_error = error;
-
-//     // Compute motor speeds
-//     int left_motor_speed = clamp(static_cast<int>((base_speed + output) * left_trim), 0, 255);
-//     int right_motor_speed = clamp(static_cast<int>((base_speed - output) * right_trim), 0, 255);
-
-//     // Apply motor speeds (replace with your actual motor control functions)
-//     m_left_driver.setSpeed(left_motor_speed);
-//     m_right_driver.setSpeed(right_motor_speed);;
-// }
