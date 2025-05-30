@@ -40,6 +40,10 @@ NodeZero::NodeZero(int pi, int handle) : m_speed_left(0), m_speed_right(0), m_PI
     m_accel_filtered_sub = nh.subscribe("accel/filtered", 10, &NodeZero::accel_filtered_callback, this);
     m_odometry_filtered_sub = nh.subscribe("odometry/filtered", 10, &NodeZero::odometry_filtered_callback, this);
 
+    m_pid_heading_setpoint_pub = nh.advertise<std_msgs::Float64>("pid_heading/setpoint", 10);
+    m_pid_heading_state_pub = nh.advertise<std_msgs::Float64>("pid_heading/state", 10);
+    m_heading_effort_sub = nh.subscribe("pid_heading/control_effort", 10, &NodeZero::heading_effort_callback, this);
+
     node = this;
 
     m_head.servo_driver.set_speed(0);
@@ -61,23 +65,29 @@ void NodeZero::print_state() {
 }
 
 void NodeZero::cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg) {
-    m_speed_left = (int16_t)(msg->linear.x * 255.0 / 5.0);
-    m_speed_right = (int16_t)(msg->linear.y * 255.0 / 5.0);
+    m_speed = (int16_t)(msg->linear.x * 255.0 / 5.0);
 
-    // Base motor speed
-    // const int base_speed = (int16_t)(msg->linear.x * 255.0 / 5.0);
-    // // Base motor direction
-    // double target_yaw = msg->angular.z;  // Straight line
-    // yaw_angle = m_odom.pose.pose.orientation.z,
+    if (msg->angular.z) {
+        std_msgs::Float64 setpoint;
+        setpoint.data = m_odom.pose.pose.orientation.z + msg->angular.z;
+        m_pid_heading_setpoint_pub.publish(setpoint);
+    }
 
-    ROS_INFO("Setting speed to: left: %d, right: %d", m_speed_left, m_speed_right);
-
-    // m_left_driver.setSpeed(m_speed_left);
-    // m_right_driver.setSpeed(m_speed_right);
+    ROS_INFO("Got cmd_vel: speed: %d, angle: %f", m_speed, msg->angular.z);
 
     print_state();
-    return;
 }
+
+void NodeZero::heading_effort_callback(const std_msgs::Float64::ConstPtr& msg) {
+    // ROS_INFO("Heading effort received: %f", msg->data);
+
+    m_speed_left = m_speed + msg->data * m_speed;
+    m_speed_right = m_speed - msg->data * m_speed;
+    
+    m_left_driver.setSpeed(m_speed_left);
+    m_right_driver.setSpeed(m_speed_right);
+};
+
 
 void NodeZero::cmd_head_callback(const std_msgs::Int32::ConstPtr& msg) {
     m_head.desired_steps = msg->data ;
@@ -123,6 +133,11 @@ void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick) {
 
 void NodeZero::odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg){
     m_odom = *msg;
+
+    std_msgs::Float64 state;
+    state.data = msg->pose.pose.orientation.z;
+    m_pid_heading_state_pub.publish(state);
+    
     // ROS_INFO("Pose Orinetation x: %f, y: %f, z: %f, w: %f", 
     //     msg->pose.pose.orientation.x,
     //     msg->pose.pose.orientation.y,

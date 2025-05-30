@@ -1,4 +1,5 @@
 #include "std_msgs/Int32.h"
+#include "std_msgs/Float64.h"
 #include "std_msgs/Empty.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
@@ -60,6 +61,7 @@ public:
 private:
     int m_PI;
 
+    int16_t m_speed;
     int16_t m_speed_right;
     int16_t m_speed_left;
     L298N m_left_driver;
@@ -88,7 +90,13 @@ private:
     // Subscibe Odometry
     ros::Subscriber m_odometry_filtered_sub; 
     void odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg);
-    nav_msgs::Odometry m_odom; 
+    nav_msgs::Odometry m_odom;
+
+    // Heading PID
+    ros::Publisher m_pid_heading_setpoint_pub;
+    ros::Publisher m_pid_heading_state_pub;
+    ros::Subscriber m_heading_effort_sub;
+    void heading_effort_callback(const std_msgs::Float64::ConstPtr& msg);
 
     PID pid_left;
     PID pid_right;
