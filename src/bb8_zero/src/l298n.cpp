@@ -32,7 +32,7 @@ void L298N::setSpeed(int16_t speed)
   // 0 = full speed, 255 = brake
   uint8_t duty = 255 - static_cast<uint8_t>(std::abs(speed));
 
-  ROS_INFO("Speed: %d, duty: %d", speed, duty);
+  // ROS_INFO("Speed: %d, duty: %d", speed, duty);
 
   if (speed > 0) {
     // forward
