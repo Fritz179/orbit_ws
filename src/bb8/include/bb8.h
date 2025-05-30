@@ -11,8 +11,8 @@ public:
 
 
 private:
-    // set head tilt
-    ros::Publisher m_head_tilt_pub;
+    // Head pitch
     ros::Subscriber m_head_imu_sub;
+    ros::Publisher m_pid_pitch_pub;
     void head_imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
 };
