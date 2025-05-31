@@ -1,5 +1,6 @@
 #include "std_msgs/Int32.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Bool.h"
 #include "std_msgs/Empty.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
@@ -12,20 +13,6 @@
 #include <sstream>
 
 void limit_switch_callback(int pi, uint32_t pin, uint32_t edge, uint32_t tick);
-
-class PID {
-    public:
-        PID(double kp, double ki, double kd)
-            : kp_(kp), ki_(ki), kd_(kd), prev_error_(0.0), integral_(0.0), prev_time_(ros::Time::now()) {}
-    
-        double update(double target, double current);
-        // double Motor_update(double yaw_angle, double d_t);
-    private:
-        // int base_speed;
-        double kp_, ki_, kd_;
-        double prev_error_, integral_;
-        ros::Time prev_time_;
-    };
 
 class NodeZero
 {
@@ -62,6 +49,7 @@ private:
     int m_PI;
 
     int16_t m_speed;
+    double m_heading;
     int16_t m_speed_right;
     int16_t m_speed_left;
     L298N m_left_driver;
@@ -73,6 +61,16 @@ private:
     Head m_head;
 
     ros::NodeHandle nh;
+
+    // Emergency stop
+    ros::Subscriber m_enable_sub;
+    void enable_callback(const std_msgs::Bool::ConstPtr& msg);
+    bool m_enabled;
+
+    // Enable head movement
+    ros::Subscriber m_enable_head_sub;
+    void enable_head_callback(const std_msgs::Bool::ConstPtr& msg);
+    bool m_head_enabled;
 
     // set wheel velocity
     ros::Subscriber m_cmd_vel_sub;
@@ -95,15 +93,16 @@ private:
     // Heading PID
     ros::Publisher m_pid_heading_setpoint_pub;
     ros::Publisher m_pid_heading_state_pub;
-    ros::Subscriber m_heading_effort_sub;
-    void heading_effort_callback(const std_msgs::Float64::ConstPtr& msg);
+    ros::Subscriber m_pid_heading_effort_sub;
+    void pid_heading_effort_callback(const std_msgs::Float64::ConstPtr& msg);
 
-    PID pid_left;
-    PID pid_right;
+    // Pitch PID
+    ros::Subscriber m_pid_pitch_effort_sub;
+    void pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg);
 
     ros::Timer m_head_timer;
     void update_head(const ros::TimerEvent&);
-    
-    ros::Timer m_pid_timer;
-    void update_PID(const ros::TimerEvent&);
+
+    ros::Timer m_print_state_timer;
+    void print_state(const ros::TimerEvent&);
 };
