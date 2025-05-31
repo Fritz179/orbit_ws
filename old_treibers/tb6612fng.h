@@ -1,7 +1,7 @@
 #ifndef TB6612FNG_H
 #define TB6612FNG_H
 
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 #include <cstdint>
 #include <algorithm>
 

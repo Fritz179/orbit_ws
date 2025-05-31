@@ -19,19 +19,12 @@ public:
    * @param ms1_pin     GPIO pin connected to ATD5833 MS1
    * @param ms2_pin     GPIO pin connected to ATD5833 MS2
    */
-  ATD5833(uint8_t step_pin,
+  ATD5833(int pi, uint8_t step_pin,
                uint8_t dir_pin,
-               uint8_t enable_pin,
                uint8_t ms1_pin,
                uint8_t ms2_pin);
 
   ~ATD5833();
-
-  /** Enable the driver (allows stepping). */
-  void enable();
-
-  /** Disable the driver (forces high-impedance, no stepping). */
-  void disable();
 
   /**
    * Set direction.
@@ -74,6 +67,8 @@ public:
 
 
 private:
+  int m_PI;
+
   uint8_t step_pin_;
   uint8_t dir_pin_;
   uint8_t enable_pin_;
@@ -81,8 +76,6 @@ private:
   uint8_t ms2_pin_;
 
   int m_microstep_size;
-
-  static constexpr uint32_t kPulseWidthUs = 2;  // STEP pin high time
 };
 
 #endif  // ATD5833_H

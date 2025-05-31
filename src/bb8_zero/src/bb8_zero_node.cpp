@@ -4,13 +4,24 @@
 int main(int argc, char** argv) {
     ros::init(argc, argv, "node_zero");
 
-    if (gpioInitialise() < 0) {
-        ROS_ERROR("pigpio init failed");
+    int pi = pigpio_start(NULL, NULL); 
+    if (pi < 0) {
+        ROS_ERROR("pigpio init failed: %s", pigpio_error(pi));
+        return 1;
     }
 
-    NodeZero node;
+    int handle = serial_open(pi, (char*)"/dev/ttyUSB0", 115200, 0);
+    if (handle < 0) {
+        ROS_ERROR("pigpio handle init failed: %s", pigpio_error(handle));
+        return 1;
+    }
+
+    NodeZero node(pi, handle);
+    ROS_INFO("NodeZero create succesfully!");
+
     ros::spin();
 
-    gpioTerminate();
+    serial_close(pi, handle);
+    pigpio_stop(pi);
     return 0;
 }

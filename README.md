@@ -579,6 +579,7 @@ speaker-test -t wav -c 2
 # God forgive me for what I am about to do
 touch src/cartographer/cartographer_ros/COLCON_IGNORE
 colcon build --packages-select cartographer_ros_msgs --build-base colcon_build
+
 colcon build --packages-select ros1_bridge --cmake-force-configure --build-base colcon_build    
 
 
@@ -604,3 +605,22 @@ Remove any existing nameserver lines and add these:
 
 nameserver 8.8.8.8
 nameserver 1.1.1.1
+
+colcon build --packages-select ros1_bridge --cmake-force-configure --build-base colcon_build
+
+qt.qpa.xcb: XKeyboard extension not present on the X server
+
+process has died [pid 2621, exit code -11, cmd /opt/ros/noetic/lib/rviz/rviz -d /home/ros/bb8_ws/src/cartographer/cartographer_ros/cartographer_ros/configuration_files/demo_3d.rviz __name:=rviz __log:=/home/ros/.ros/log/0343591a-301a-11f0-9d08-ed3397efa0af/rviz-5.log].
+log file: /home/ros/.ros/log/0343591a-301a-11f0-9d08-ed3397efa0af/rviz-5*.log
+Initiating shutdown!
+
+[playbag-6] killing on exit
+
+roslaunch cartographer_ros demo_backpack_3d.launch bag_filename:=${HOME}/Downloads/b3-2016-02-02-13-32-01.bag
+
+x11vnc -display :0 \
+       -auth /run/user/130/gdm/Xauthority \
+       -rfbauth ~/.vnc/passwd \
+       -forever -shared -noxdamage -xkb -clipboard
+
+       x11vnc -display :0 -auth /run/user/130/gdm/Xauthority  -rfbauth ~/.vnc/passwd -forever -shared -noxdamage -xkb

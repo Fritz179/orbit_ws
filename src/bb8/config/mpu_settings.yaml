@@ -12,14 +12,18 @@ frame_id: "head_imu"
 
 # Offsets to fix wrong values caused by misalignment
 # Sequence is (ax, ay, az, gx, gy, gz) (default: [0, 0, 0, 0, 0, 0])
-axes_offsets: [-1514, -1428, 1202, 109, 12, 17]
+axes_offsets: [-1290, -1473, 1168, 114, 22, 9]
 
-# [INFO] [1746468582.685896383]: Final offset of Accel X axis = -1514
-# [INFO] [1746468582.686087972]: Final offset of Accel Y axis = -1428
-# [INFO] [1746468582.686230229]: Final offset of Accel Z axis = 1202
-# [INFO] [1746468582.686359375]: Final offset of Gyro  X axis = 109
-# [INFO] [1746468582.686495039]: Final offset of Gyro  Y axis = 12
-# [INFO] [1746468582.686601704]: Final offset of Gyro  Z axis = 17
+
+#   x: 114.07621765136719
+#   y: 22.84402084350586
+#   z: 9.288013458251953
+# angular_velocity_covariance: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+# linear_acceleration: 
+#   x: -1290.7132568359375
+#   y: -1473.2972412109375
+#   z: 1168.8055419921875
+
 
 
 # PID constants used in calibration procedure

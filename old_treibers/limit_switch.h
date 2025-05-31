@@ -1,7 +1,7 @@
 #ifndef LIMIT_SWITCH_H
 #define LIMIT_SWITCH_H
 
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 #include <cstdint>
 #include "NC.h"
 

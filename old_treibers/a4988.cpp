@@ -1,5 +1,5 @@
 #include "a4988.h"
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 #include <unistd.h>  // for gpioDelay
 #include <vector>
 
@@ -96,10 +96,10 @@ void A4988::step_sync(uint32_t steps, uint32_t period_us)
 
   for (uint32_t i = 0; i < steps; ++i) {
     gpioWrite(step_pin_, 1);
-    gpioDelay(kPulseWidthUs);
+    gpioDelay(period_us / 2);
 
     gpioWrite(step_pin_, 0);
-    gpioDelay(period_us - kPulseWidthUs);
+    gpioDelay(period_us / 2);
   }
 }
 
