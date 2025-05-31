@@ -1,40 +1,27 @@
 <launch>
-    <!-- RPLidar driver -->
-    <node pkg="rplidar_ros" type="rplidarNode" name="rplidar" output="screen">
-        <param name="serial_port"   value="/dev/ttyUSB0"/>
-        <param name="frame_id"      value="laser"/>
-        <param name="angle_compensate" value="true"/>
-    </node>
-
-    <!-- IMU ros node -->
-      <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
+    <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
         <rosparam file="$(find bb8)/config/mpu_settings.yaml" command="load"/>
-        <remap from="imu/data_raw" to="/imu_head"/>
     </node>
 
-
-    <!-- Robot URDF description -->
-    <include file="$(find bb8)/launch/description.launch"/>
-
-
-    <!-- Cartographer SLAM with 3D config -->
-    <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" output="screen"
-        args="-configuration_directory $(find bb8)/config
-                -configuration_basename ros_3d.lua">
-        <!-- <remap from="/imu_head" to="/imu"/> -->
-        <remap from="/imu" to="/imu_head"/>
+    <node name="imu_filter_node" pkg="imu_filter_madgwick" type="imu_filter_node" output="screen">
+        <rosparam file="$(find bb8)/config/madgwick_filter_params.yaml" command="load"/>
+        <!-- <remap from="imu/data" to="imu_head"/> -->
     </node>
 
-    <!-- Occupancy   publisher -->
-    <node name="occupancy_grid_node" pkg="cartographer_ros" type="cartographer_occupancy_grid_node" output="screen"
-          args="-resolution 0.05 -publish_period_sec 1.0"/>
+    <node pkg="topic_tools" type="throttle" name="imu_throttle"
+          args="messages /imu/data 50.0 /imu_head"
+          output="screen" />
 
+    <group ns="pid_pitch">
+    <node name="controller" pkg="pid" type="controller" output="screen">
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.1" />
+        <param name="Kd" value="0.05" />
 
-    <!--  OctoMap server -->
-    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
-        <!-- Subscribe to Cartographer’s live cloud -->
-        <remap from="cloud_in" to="/points2"/>
-        <param name="resolution"            value="0.05"/>
-        <param name="frame_id"              value="map"/>
+        <param name="angle_error" value="true" />
+        <param name="upper_limit" value="1.0" />  <param name="lower_limit" value="-1.0" /> <param name="max_loop_frequency" value="50.0" />
     </node>
+    </group>
+
+    <node name="bb8" pkg="bb8" type="bb8" output="screen"/>
 </launch>

@@ -5,21 +5,19 @@ bus_uri: "/dev/i2c-1"
 mpu_address: 0x68
 
 # Frequency in Hertz wich IMU data is published (default: 30)
-pub_rate: 500
+pub_rate: 100
 
 # Frame if of IMU message (default: "imu")
-frame_id: "imu"
+frame_id: "sphere_imu"
 
 # Offsets to fix wrong values caused by misalignment
 # Sequence is (ax, ay, az, gx, gy, gz) (default: [0, 0, 0, 0, 0, 0])
-axes_offsets: [-1514, -1428, 1202, 109, 12, 17]
+axes_offsets: [1165, 1950, 897, 112, -22, 60]
 
-# To still calibrate
 
-# PID constants used in calibration procedure
-ki: 0.2 # (default: 0.1)
-kp: 0.1 # (default: 0.1)
-
-# The calibration process is finished when the error is aproximate zero with
-# the precision set by delta (default: 0.5) 
-delta: 0.5
+# [INFO] [1748359627.933288091]: Final offset of Accel X axis = 1165
+# [INFO] [1748359627.933444202]: Final offset of Accel Y axis = 1950
+# [INFO] [1748359627.933521832]: Final offset of Accel Z axis = 897
+# [INFO] [1748359627.933572369]: Final offset of Gyro  X axis = 112
+# [INFO] [1748359627.933619684]: Final offset of Gyro  Y axis = -22
+# [INFO] [1748359627.933681128]: Final offset of Gyro  Z axis = 60

@@ -1,20 +1,43 @@
 <launch>
 
-  <!-- IMU  -->
-  <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
-    <rosparam file="$(find bb8_zero)/config/mpu_settings.yaml" command="load"/>
-    <remap from="imu/data_raw" to="imu_sphere"/>
-  </node>
+    <!-- IMU  -->
+    <node name="mpu_node" pkg="mpu6050_driver" type="mpu6050_node" output="screen">
+        <rosparam file="$(find bb8_zero)/config/mpu_settings.yaml" command="load"/>
+    </node>
 
-  <!-- odometry -->
+    <!-- Madgwick filter -->
+    <node name="imu_filter_node" pkg="imu_filter_madgwick" type="imu_filter_node" output="screen">
+        <rosparam file="$(find bb8_zero)/config/madgwick_filter_params.yaml" command="load"/>
+        <remap from="/imu/data" to="/sphere_imu"/>
+    </node>
+
+    <!-- odometry -->
     <node pkg="robot_localization" type="ekf_localization_node"
             name="ekf_localization" clear_params="true" output="screen">
 
         <rosparam command="load"
-        file="$(find my_robot_bringup)/config/ekf_sphere.yaml"
-        ns="ekf_localization_node"/>
+        file="$(find bb8_zero)/config/ekf_sphere.yaml"/>
     </node>
+    
+    <!-- Heading PID -->
+    <group ns="pid_heading">
+        <node name="pid_heading" pkg="pid" type="controller" output="screen">
+        <param name="Kp" value="15" />
+        <param name="Ki" value="0" />
+        <param name="Kd" value="0.05" />
+
+        <param name="angle_error" value="true" />
+        <param name="angle_wrap" value="2" />
+
+        <param name="upper_limit" value="1" />  
+        <param name="lower_limit" value="-1" /> 
+        <param name="windup_limit" value="100" />
+
+        <param name="max_loop_frequency" value="50.0" />
+        <param name="min_loop_frequency" value="10.0" />
+    </node>
+    </group>
 
     <!-- Controller -->
-    <node name="bb8_zero" pkg="bb8_zero" type="bb8_zero_node" output="screen"/>
+    <node name="bb8_zero" pkg="bb8_zero" type="bb8_zero" output="screen"/>
 </launch>
