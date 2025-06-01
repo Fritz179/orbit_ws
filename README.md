@@ -624,3 +624,5 @@ x11vnc -display :0 \
        -forever -shared -noxdamage -xkb -clipboard
 
        x11vnc -display :0 -auth /run/user/130/gdm/Xauthority  -rfbauth ~/.vnc/passwd -forever -shared -noxdamage -xkb
+
+respawn-pane -k

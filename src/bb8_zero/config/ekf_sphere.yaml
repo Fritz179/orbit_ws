@@ -10,7 +10,7 @@ publish_tf:     true
 publish_acceleration: true    # enable /accel/filtered stream
 
 ## ----------  Sphere IMU  ----------
-imu0: /sphere_imu                # topic from the driver
+imu0: /sphere/imu/data                # topic from the driver
 imu0_differential: false
 imu0_relative:     false
 imu0_remove_gravitational_acceleration: true
