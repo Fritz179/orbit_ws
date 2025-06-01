@@ -5,6 +5,7 @@
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/AccelWithCovarianceStamped.h"
 #include "nav_msgs/Odometry.h"
+#include "sensor_msgs/Imu.h"
 
 #include "l298n.h"
 #include "lx16a.h"
@@ -48,15 +49,8 @@ public:
 private:
     int m_PI;
 
-    int16_t m_speed;
-    double m_heading;
-    int16_t m_speed_right;
-    int16_t m_speed_left;
     L298N m_left_driver;
     L298N m_right_driver;
-
-    int m_ls_left_cb_id;
-    int m_ls_right_cb_id;
 
     Head m_head;
 
@@ -75,6 +69,9 @@ private:
     // set wheel velocity
     ros::Subscriber m_cmd_vel_sub;
     void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg);
+    int16_t m_speed;
+    int16_t m_speed_right;
+    int16_t m_speed_left;
     
     // set wheel deisred position, -1 = Full Left, 1 = Full Right
     ros::Subscriber m_cmd_head_sub;
@@ -95,10 +92,18 @@ private:
     ros::Publisher m_pid_heading_state_pub;
     ros::Subscriber m_pid_heading_effort_sub;
     void pid_heading_effort_callback(const std_msgs::Float64::ConstPtr& msg);
+    double m_heading;
 
     // Pitch PID
+    ros::Subscriber m_head_imu_sub;
+    ros::Publisher m_pid_pitch_pub;
+    void head_imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
+    double m_pitch_vel;
+
+    ros::Publisher m_pid_pitch_setpoint_pub;
     ros::Subscriber m_pid_pitch_effort_sub;
     void pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg);
+    double m_pitch;
 
     ros::Timer m_head_timer;
     void update_head(const ros::TimerEvent&);
