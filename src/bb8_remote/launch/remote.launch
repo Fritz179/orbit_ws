@@ -1,14 +1,6 @@
 <launch>
 <group ns="remote">
 
-    <node name="rqt_plot_pid_pitch" pkg="rqt_plot" type="rqt_plot"
-        args="/sphere/pid_pitch/control_effort/data /sphere/pid_pitch/state/data /sphere/pid_pitch/setpoint/data" />
-    
-    <node name="rqt_plot_pid_heading" pkg="rqt_plot" type="rqt_plot"
-        args="/sphere/pid_heading/control_effort/data /sphere/pid_heading/state/data /sphere/pid_heading/setpoint/data" />
-
-    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" />
-
     <!-- Launch bb8_remote.py -->
     <node name="bb8_remote" pkg="bb8_remote" type="bb8_remote.py" output="screen" />
 </group>
