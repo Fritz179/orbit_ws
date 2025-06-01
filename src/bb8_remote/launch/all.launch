@@ -1,0 +1,7 @@
+<launch>
+    <!-- Pitch, Heading and Reconfigure -->
+    <include file="$(find bb8_remote)/launch/rqt.launch" />
+    
+    <!-- Controller -->
+    <include file="$(find bb8_remote)/launch/remote.launch" />
+</launch>

@@ -19,12 +19,12 @@ NodeZero::NodeZero(int pi, int handle) :
     m_right_driver(pi, 19,      26),
 
     //                               ls_left, ls_right
-    m_head(pi, LX16A(pi, handle, 1), 27,      4)
+    m_head(pi, LX16A(pi, handle, 1), 9,       25)
 
 {
     // Limit switch hack
-    gpio_write(pi, 22, 0); // ls_left =>  3.3V,      22 = GND, 27 = S
-    gpio_write(pi, 17, 1); // ls_right => 17 = 3.3V, GND,      4 = S
+    gpio_write(pi, 10, 0); // ls_left =>  3.3V,      10 = GND, 9 = S
+    gpio_write(pi, 24, 1); // ls_right => 24 = 3.3V, GND,      25 = S
 
     // Enable and Commands
     m_enable_sub = nh.subscribe("/remote/enable", 10, &NodeZero::enable_callback, this);
@@ -40,7 +40,7 @@ NodeZero::NodeZero(int pi, int handle) :
     m_pid_heading_effort_sub = nh.subscribe("/sphere/pid_heading/control_effort", 10, &NodeZero::pid_heading_effort_callback, this);
 
     // Head IMU and PID
-    m_head_imu_sub = nh.subscribe("/head/imu/data_50hz", 10, &NodeZero::head_imu_callback, this);
+    m_head_imu_sub = nh.subscribe("/head/imu/data_100hz", 10, &NodeZero::head_imu_callback, this);
     m_pid_pitch_pub = nh.advertise<std_msgs::Float64>("/sphere/pid_pitch/state", 10);
     m_pid_pitch_setpoint_pub = nh.advertise<std_msgs::Float64>("/sphere/pid_pitch/setpoint", 10);
     m_pid_pitch_effort_sub = nh.subscribe("/sphere/pid_pitch/control_effort", 10, &NodeZero::pid_pitch_effort_callback, this);
@@ -62,7 +62,7 @@ NodeZero::NodeZero(int pi, int handle) :
 
     // Send the first setpoint.
     ros::Rate loop_rate(1);
-    while (m_pid_heading_setpoint_pub.getNumSubscribers() == 0) {
+    while (m_pid_heading_setpoint_pub.getNumSubscribers() == 0 || m_pid_pitch_setpoint_pub.getNumSubscribers() == 0) {
         ROS_INFO("Waiting for subscribers to %s...", m_pid_heading_setpoint_pub.getTopic().c_str());
         
         if (!ros::ok()) {
@@ -72,9 +72,12 @@ NodeZero::NodeZero(int pi, int handle) :
         loop_rate.sleep();
     }
 
+    loop_rate.sleep();
+
     std_msgs::Float64 setpoint;
     setpoint.data = m_heading;
     m_pid_heading_setpoint_pub.publish(setpoint);
+    m_pid_pitch_setpoint_pub.publish(setpoint);
 }
 
 void NodeZero::print_state(const ros::TimerEvent&) {
@@ -156,10 +159,14 @@ void NodeZero::pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg)
     // ROS_INFO("Pitching effort received: %f", msg->data);
     
     if (m_enabled && m_head_enabled && m_head.desired_steps == 0) {
-        if (m_pitch_vel > 0.1) {
+        if (m_pitch_vel > 0.5) {
+            ROS_INFO("Pitching right");
             m_head.servo_driver.set_speed(gpio_read(m_PI, m_head.ls_right) ? 0 : -1000.0);
-        } else if (m_pitch_vel < 0.1) {
+            return;
+        } else if (m_pitch_vel < -0.5) {
+            ROS_INFO("Pitching left");
             m_head.servo_driver.set_speed(gpio_read(m_PI, m_head.ls_left) ? 0 : 1000.0);
+            return;
         }   
 
         if (msg->data > 0 && !gpio_read(m_PI, m_head.ls_right)) {
