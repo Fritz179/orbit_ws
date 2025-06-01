@@ -8,8 +8,6 @@
 int main(int argc, char** argv) {
     ros::init(argc, argv, "node_bb8");
 
-    ROS_INFO("BB8 Node asdfasdf");
-
     ledstring = {0};
 
     ledstring.freq = WS2811_TARGET_FREQ;
@@ -27,27 +25,28 @@ int main(int argc, char** argv) {
     ledstring.channel[1].invert = 0;
     ledstring.channel[1].brightness = 0;
 
-    if (ws2811_init(&ledstring) != WS2811_SUCCESS) {
-        fprintf(stderr, "ws2811_init failed\n");
-        return 1;
-    }
+    // if (ws2811_init(&ledstring) != WS2811_SUCCESS) {
+    //     fprintf(stderr, "ws2811_init failed\n");
+    //     return 1;
+    // }
 
     BB8 node;
+    ROS_INFO("BB8 Node Started!");
 
-    srand(time(NULL));
-    SimpleButtonDetector detector(node.nh);
-    eye(white);
+    // srand(time(NULL));
+    // SimpleButtonDetector detector(node.nh);
+    // eye(white);
 
 
     ros::Rate loop_rate(10);
 
     while (ros::ok()) {
         ros::spinOnce();
-        standby_noise();
-        loop_rate.sleep();
+        // standby_noise();
+        // loop_rate.sleep();
     }
 
-    ws2811_fini(&ledstring);
+    // ws2811_fini(&ledstring);
 
     return 0;
 }
