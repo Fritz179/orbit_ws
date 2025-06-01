@@ -22,22 +22,23 @@ class Remote:
         self._enable = False
 
         f = rospy.get_param('~forward_rate', 4.0)
-        b = rospy.get_param('~backward_rate', 3.0)
-        r = rospy.get_param('~rotation_rate', 0.01)
+        r = rospy.get_param('~rotation_rate', 0.1)
         h = rospy.get_param('~rotation_rate', 0.01)
 
         self.directions = {
-            Key.up: (f, 0, 0),
-            Key.down: (-b, 0, 0),
-            Key.left: (0, r, 0),
-            Key.right: (0, -r, 0),
-            "w": (f, 0, 0),
-            "s": (-b, 0, 0),
-            "a": (0, r, 0),
-            "d": (0, -r, 0),
-            "q": (0, 0, h),
-            "e": (0, 0, -h)
+            Key.up: (1, 0, 0),
+            Key.down: (-1, 0, 0),
+            Key.left: (0, 1, 0),
+            Key.right: (0, -1, 0),
+            "w": (1, 0, 0),
+            "s": (-1, 0, 0),
+            "a": (0, 1, 0),
+            "d": (0, -1, 0),
+            "q": (0, 0, 1),
+            "e": (0, 0, -1)
         }
+
+        self.speeds = [f, r, h]
 
         self._cmd_pub = rospy.Publisher("/remote/cmd_vel", Twist, queue_size=10)
         self._cmd_head_pub = rospy.Publisher("/remote/cmd_head", Int32, queue_size=10)
@@ -81,13 +82,21 @@ class Remote:
             head_msg.data = -10
             self._cmd_head_pub.publish(head_msg)
             self._head -= 10
+        elif key == "o":
+            self.speeds[0] *= 1.1
+        elif key == "p":
+            self.speeds[0] /= 1.1
+        elif key == "k":
+            self.speeds[1] *= 1.1
+        elif key == "l":
+            self.speeds[1] /= 1.1
 
 
         if key in self.directions:
             cmd = self.directions[key]
             for i in [0, 1, 2]:
                 if cmd[i] != 0:
-                    self._command[i] = cmd[i]
+                    self._command[i] = cmd[i] * self.speeds[i]
 
     def on_release(self, key):
         if hasattr(key, 'char'):
@@ -108,8 +117,10 @@ Commands:
   - Right:          D | RIGHT
   - Head Forwards:  Q
   - Head Backwards: E
-  - Head Manual +:  +
-  - Head Manual -:  -
+  - Head Manual:    + | -
+
+  - Speed:          o | p -> {self.speeds[0]:.3f}
+  - rotation:       k | l -> {self.speeds[1]:.3f}
 
   - Disbale:        SPACE
   - Enable:         B
@@ -145,3 +156,6 @@ if __name__ == "__main__":
         main()
     except rospy.ROSInterruptException:
         pass
+
+
+# 4, 0.1, -10

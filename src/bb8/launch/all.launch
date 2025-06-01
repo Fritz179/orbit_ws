@@ -18,11 +18,11 @@
 
         <!-- Throttle the pitch controll -->
         <node pkg="topic_tools" type="throttle" name="imu_throttle_head"
-            args="messages /head/imu/data 50.0 /head/imu/data_50hz" output="screen" />
+            args="messages /head/imu/data 100.0 /head/imu/data_100hz" output="screen" />
 
 
         <!-- SLAM -->
-        <!-- <include file="$(find bb8)/launch/slam.launch"/> -->
+        <include file="$(find bb8)/launch/slam.launch"/>
 
 
         <node name="bb8" pkg="bb8" type="bb8" output="screen"/>
