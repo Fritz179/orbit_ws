@@ -2,6 +2,10 @@
     <!-- Pitch, Heading and Reconfigure -->
     <include file="$(find bb8_remote)/launch/rqt.launch" />
     
+    <!-- Rviz -->
+    <include file="$(find bb8_remote)/launch/rviz.launch" />
+
     <!-- Controller -->
     <include file="$(find bb8_remote)/launch/remote.launch" />
 </launch>
+7
