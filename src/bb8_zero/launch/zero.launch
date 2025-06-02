@@ -23,9 +23,9 @@
     <!-- Heading PID -->
     <group ns="pid_heading">
         <node name="pid_heading" pkg="pid" type="controller" output="screen">
-        <param name="Kp" value="15" />
+        <param name="Kp" value="-5" />
         <param name="Ki" value="0" />
-        <param name="Kd" value="0.05" />
+        <param name="Kd" value="0" />
 
         <param name="angle_error" value="true" />
         <param name="angle_wrap" value="2" />

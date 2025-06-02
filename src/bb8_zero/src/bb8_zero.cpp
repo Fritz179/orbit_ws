@@ -159,11 +159,11 @@ void NodeZero::pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg)
     // ROS_INFO("Pitching effort received: %f", msg->data);
     
     if (m_enabled && m_head_enabled && m_head.desired_steps == 0) {
-        if (m_pitch_vel > 0.5) {
+        if (m_pitch_vel > 0.8) {
             ROS_INFO("Pitching right");
             m_head.servo_driver.set_speed(gpio_read(m_PI, m_head.ls_right) ? 0 : -1000.0);
             return;
-        } else if (m_pitch_vel < -0.5) {
+        } else if (m_pitch_vel < -0.8) {
             ROS_INFO("Pitching left");
             m_head.servo_driver.set_speed(gpio_read(m_PI, m_head.ls_left) ? 0 : 1000.0);
             return;
