@@ -1,43 +1,42 @@
-DWAPlannerROS:
-  # Robot Configuration Parameters
-  max_vel_x: 1.0
-  min_vel_x: -1.0
-  max_vel_y: 1.0
-  min_vel_y: -1.0
-  max_vel_trans: 1.4142
-  min_vel_trans: -1.4142
-  max_vel_theta: 3.1415
-  min_vel_theta: -3.1415
-  acc_lim_x: 7.5
-  acc_lim_y: 7.5
-  acc_lim_theta: 7.5
-  
-  holonomic_robot: false
-  
-  # Goal Tolerance Parameters
-  xy_goal_tolerance: 0.005
-  yaw_goal_tolerance: 0.1
-  latch_xy_goal_tolerance: false
+# Robot Configuration Parameters
+max_vel_x:            0.40
+min_vel_x:            0.00
+max_vel_theta:        1.0
+min_vel_theta:       -1.0
+acc_lim_x:            0.6
+acc_lim_theta:        2.0
 
-  # Forward Simulation Parameters
-  sim_time: 2.0
-  vx_samples: 20
-  vy_samples: 20
-  vth_samples: 40
-  controller_frequency: 10.0
+holonomic_robot: false
 
-  # Trajectory Scoring Parameters
-  path_distance_bias: 32.0
-  goal_distance_bias: 20.0
-  occdist_scale: 0.02
-  forward_point_distance: 0.325
-  stop_time_buffer: 0.2
-  scaling_speed: 0.3
-  max_scaling_factor: 1.0
+# This also needed even if holonomic_robot is false
+max_vel_y: 0.0
+min_vel_y: 0.0
+vy_samples: 0
 
-  # Oscillation Prevention Parameters
-  oscillation_reset_dist: 0.05
+# Goal Tolerance Parameters
+xy_goal_tolerance: 0.005
+yaw_goal_tolerance: 0.1
+latch_xy_goal_tolerance: false
 
-  # Debugging
-  publish_traj_pc: true
-  publish_cost_grid_pc: true
+# Forward Simulation Parameters
+sim_time: 2.0
+vx_samples: 20
+vy_samples: 20
+vth_samples: 40
+controller_frequency: 10.0
+
+# Trajectory Scoring Parameters
+path_distance_bias: 32.0
+goal_distance_bias: 20.0
+occdist_scale: 0.02
+forward_point_distance: 0.325
+stop_time_buffer: 0.2
+scaling_speed: 0.3
+max_scaling_factor: 1.0
+
+# Oscillation Prevention Parameters
+oscillation_reset_dist: 0.05
+
+# Debugging
+publish_traj_pc: true
+publish_cost_grid_pc: true

@@ -42,21 +42,25 @@
         </node>
 
         <!--  OctoMap server -->
-        <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
+        <!-- <node pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen">
             <remap from="cloud_in" to="/head/scan_matched_points2"/>
             <param name="resolution"            value="0.05"/>
             <param name="frame_id"              value="map"/>
-        </node>
+        </node> -->
 
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-            <remap from="/cmd_vel" to="/cmd_vel_planned"/>
+            <!-- <remap from="/cmd_vel" to="/cmd_vel_planned"/> -->
+            <remap from="/head/move_base_simple/goal" to="/move_base_simple/goal"/>
 
-            <rosparam file="$(find bb8)config/navigation/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-            <rosparam file="$(find bb8)config/navigation/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+              <rosparam command="load" ns="global_costmap"
+            file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
+  <rosparam command="load" ns="local_costmap"
+            file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
             <rosparam file="$(find bb8)config/navigation/local_costmap_params.yaml" command="load"/>
             <rosparam file="$(find bb8)config/navigation/global_costmap_params.yaml" command="load"/>
             <rosparam file="$(find bb8)config/navigation/move_base_params.yaml" command="load"/>
-            <rosparam file="$(find bb8)config/navigation/dwa_local_planner_params.yaml" command="load"/>
+              <rosparam command="load" ns="DWAPlannerROS"
+            file="$(find bb8)/config/navigation/dwa_local_planner_params.yaml"/>
         </node>
 
         <!-- Exploration -->
