@@ -7,6 +7,7 @@
 #include "nav_msgs/Odometry.h"
 #include "sensor_msgs/Imu.h"
 
+#include "pid.h"
 #include "l298n.h"
 #include "lx16a.h"
 #include <pigpiod_if2.h>
@@ -66,47 +67,30 @@ private:
     void enable_head_callback(const std_msgs::Bool::ConstPtr& msg);
     bool m_head_enabled;
 
-    // set wheel velocity
+    // Heading and Thrust
     ros::Subscriber m_cmd_vel_sub;
     void cmd_vel_callback(const geometry_msgs::Twist::ConstPtr& msg);
-    int16_t m_speed;
+    PID m_pid_speed;
+    PID m_pid_heading;
+    void update_motors();
     int16_t m_speed_right;
     int16_t m_speed_left;
     
-    // set wheel deisred position, -1 = Full Left, 1 = Full Right
-    ros::Subscriber m_cmd_head_sub;
-    void cmd_head_callback(const std_msgs::Int32::ConstPtr& msg);
-    
     // Subscribe ekf
     ros::Subscriber m_accel_filtered_sub;
-    void accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
-    geometry_msgs::AccelWithCovarianceStamped m_accel;
-    
-    // Subscibe Odometry
     ros::Subscriber m_odometry_filtered_sub; 
+    void accel_filtered_callback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
     void odometry_filtered_callback(const nav_msgs::Odometry::ConstPtr& msg);
     nav_msgs::Odometry m_odom;
+    geometry_msgs::AccelWithCovarianceStamped m_accel;
 
-    // Heading PID
-    ros::Publisher m_pid_heading_setpoint_pub;
-    ros::Publisher m_pid_heading_state_pub;
-    ros::Subscriber m_pid_heading_effort_sub;
-    void pid_heading_effort_callback(const std_msgs::Float64::ConstPtr& msg);
-    double m_heading;
-
-    // Pitch PID
+    // Pitch controll
     ros::Subscriber m_head_imu_sub;
-    ros::Publisher m_pid_pitch_pub;
     void head_imu_callback(const sensor_msgs::Imu::ConstPtr& msg);
-    double m_pitch_vel;
-
-    ros::Publisher m_pid_pitch_setpoint_pub;
-    ros::Subscriber m_pid_pitch_effort_sub;
-    void pid_pitch_effort_callback(const std_msgs::Float64::ConstPtr& msg);
-    double m_pitch;
-
-    ros::Timer m_head_timer;
-    void update_head(const ros::TimerEvent&);
+    PID m_pid_pitch;
+    void update_pitch();
+    ros::Subscriber m_cmd_head_sub;
+    void cmd_head_callback(const std_msgs::Int32::ConstPtr& msg);
 
     ros::Timer m_print_state_timer;
     void print_state(const ros::TimerEvent&);

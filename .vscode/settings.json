@@ -86,6 +86,7 @@
         "valarray": "cpp",
         "variant": "cpp",
         "csetjmp": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "rope": "cpp"
     }
 }
