@@ -15,3 +15,5 @@ src/cartographer/abseil-cpp
 
 # Zero has ros bare bone installation and doesn't have common_msgs
 src/common_msgs
+
+music

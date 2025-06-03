@@ -1,0 +1,22 @@
+robot_radius: 0.165
+
+plugins:
+ - {name: static_layer, type: "costmap_2d::StaticLayer"}
+ - {name: obstacles, type: "costmap_2d::ObstacleLayer"}
+ - {name: inflation, type: "costmap_2d::InflationLayer"}
+
+
+obstacle_layer:
+  obstacle_range: 3.0
+  raytrace_range: 3.5
+  observation_sources: scan
+  scan:
+    sensor_frame: laser
+    data_type: LaserScan
+    topic: /head/scan
+    marking: true
+    clearing: true
+
+inflation_layer:
+  inflation_radius: 0.25
+  cost_scaling_factor: 5.0

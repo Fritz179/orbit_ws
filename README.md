@@ -476,7 +476,7 @@ rosrun tf view_frames
 
 
 The BB8 Projects has a raspberry pi 4b board mounted on the head, conencted with an mpu6050 and a rplidar a1.
-The secondary board is pi Zero W in the inside a sphere controlling a car and also has an mpu6050. it aslo controlls a stepper which can move the head along one axis, the head is attached magnetically to the sphere.
+The secondary board is pi Zero W in the inside a sphere controlling a car and also has an mpu6050. it aslo controlls a stepper which can rotate the head along one axis, the head is attached magnetically to the sphere.
 The head has a speaker and a led which can be controlled by the pi 4b.
 
 The pi 4b runs a ROS noetic and runs the roscore on ubutnu 20.04 and uses cartographer for mapping and localization.
