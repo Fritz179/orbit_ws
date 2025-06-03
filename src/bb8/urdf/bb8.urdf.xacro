@@ -23,7 +23,7 @@
         </collision>
     </link>
 
-    <!-- Center of the sphere, revolution center point for the head -->
+    <!-- Center of the sphere, revolution pivit point for the head -->
     <link name="base_link">
         <visual>
             <geometry>
@@ -39,6 +39,8 @@
         </visual>
     </link>
 
+    <!-- Servo link, revolution for the head -->
+    <link name="servo_link"/>
 
     <!-- Head base, point where the middle of the head "touches" the sphere -->
     <link name="head_link">
@@ -80,10 +82,10 @@
         <origin xyz="0 0 ${sphere_imu_height}" rpy="0 0 0"/>
     </joint>
 
-    <!-- Revolute joint above the sphere: allows pitching only -->
+    <!-- Revolute joint of the sphere: allows pitching only -->
     <joint name="head_joint" type="revolute">
         <parent link="base_link"/>
-        <child  link="head_link"/>
+        <child  link="servo_link"/>
 
         <!-- Offset joint pivot radius above base center -->
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -91,6 +93,14 @@
         <axis  xyz="0 1 0"/>
         <!-- Limit motion to ±45° -->
         <limit lower="${-45.0 * pi / 180.0}" upper="${45.0 * pi / 180.0}" effort="1.0" velocity="1.0"/>
+    </joint>
+
+    <!-- Head link: Lenght of the servo link -->
+    <joint name="head_joint" type="fixed">
+        <parent link="servo_link"/>
+        <child  link="head_link"/>
+
+        <origin xyz="0 0 ${sphere_diameter / 2}" rpy="0 0 0"/>
     </joint>
 
     <!-- Fixed mount lidar_height above head for lidar -->
