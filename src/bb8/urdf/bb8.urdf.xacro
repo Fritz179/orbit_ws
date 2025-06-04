@@ -83,7 +83,7 @@
     </joint>
 
     <!-- Revolute joint of the sphere: allows pitching only -->
-    <joint name="head_joint" type="revolute">
+    <joint name="servo_joint" type="revolute">
         <parent link="base_link"/>
         <child  link="servo_link"/>
 
