@@ -1,4 +1,6 @@
 <launch>
+    <arg name="map_file" default="map.pbstream" doc="The .pbstream filename of the map to load. Assumed to be in the 'bb8/maps/' directory."/>
+    <arg name="slam" default="true" doc="Start cartographer in SLAM localization mode. (false = pure localization)"/>
 
     <!-- Robot URDF description -->
     <include file="$(find bb8)/launch/description.launch"/>
@@ -28,10 +30,20 @@
             <param name="angle_compensate" value="true"/>
         </node>
 
-        <!-- Cartographer SLAM with 3D config -->
-        <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" output="screen"
+        <!-- Cartographer SLAM -->
+        <node name="cartographer_node_slam" pkg="cartographer_ros" type="cartographer_node" output="screen" if="$(arg slam)"
             args="-configuration_directory $(find bb8)/config
-                    -configuration_basename ros_3d.lua">
+                  -configuration_basename ros_2d_slam.lua">
+
+            <remap from="/head/imu" to="/head/imu/data_raw"/>
+        </node>
+        <!-- rosservice call /head/write_state "{filename: '/home/ros/bb8_ws/src/bb8/src/maps/last.pbstream', include_unfinished_submaps: false}" -->
+
+        <!-- Cartographer Localization -->
+        <node name="cartographer_node_localization" pkg="cartographer_ros" type="cartographer_node" output="screen" unless="$(arg slam)"
+            args="-configuration_directory $(find bb8)/config 
+                  -configuration_basename ros_2d_navigation.lua
+                  -load_state_filename $(find bb8)/maps/$(arg map_file)">
 
             <remap from="/head/imu" to="/head/imu/data_raw"/>
         </node>
@@ -48,27 +60,26 @@
             <param name="frame_id"              value="map"/>
         </node> -->
 
+        <!-- Navigation stack -->
         <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-            <!-- <remap from="/cmd_vel" to="/cmd_vel_planned"/> -->
             <remap from="/head/move_base_simple/goal" to="/move_base_simple/goal"/>
 
-              <rosparam command="load" ns="global_costmap"
-            file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
-  <rosparam command="load" ns="local_costmap"
-            file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
+            <rosparam command="load" ns="global_costmap" file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
+            <rosparam command="load" ns="local_costmap" file="$(find bb8)/config/navigation/costmap_common_params.yaml"/>
+
             <rosparam file="$(find bb8)config/navigation/local_costmap_params.yaml" command="load"/>
             <rosparam file="$(find bb8)config/navigation/global_costmap_params.yaml" command="load"/>
             <rosparam file="$(find bb8)config/navigation/move_base_params.yaml" command="load"/>
-              <rosparam command="load" ns="DWAPlannerROS"
-            file="$(find bb8)/config/navigation/dwa_local_planner_params.yaml"/>
+
+            <rosparam command="load" ns="DWAPlannerROS" file="$(find bb8)/config/navigation/dwa_local_planner_params.yaml"/>
         </node>
 
         <!-- Exploration -->
-        <node pkg="explore_lite" type="explore" name="explore">
+        <!-- <node pkg="explore_lite" type="explore" name="explore">
             <param name="planner_frequency" value="1.0"/>
             <param name="progress_timeout" value="15.0"/>
             <param name="visualize" value="true"/>
-        </node>
+        </node> -->
 
         <!-- <node name="bb8" pkg="bb8" type="bb8" output="screen"/> -->
 
