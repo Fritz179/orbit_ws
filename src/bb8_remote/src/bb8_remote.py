@@ -26,12 +26,12 @@ class Remote:
         h = rospy.get_param('~rotation_rate', 0.01)
 
         self.directions = {
-            Key.up: (1, 0, 0),
-            Key.down: (-1, 0, 0),
+            Key.up: (-1, 0, 0),
+            Key.down: (1, 0, 0),
             Key.left: (0, 1, 0),
             Key.right: (0, -1, 0),
-            "w": (1, 0, 0),
-            "s": (-1, 0, 0),
+            "w": (-1, 0, 0),
+            "s": (1, 0, 0),
             "a": (0, 1, 0),
             "d": (0, -1, 0),
             "q": (0, 0, 1),
@@ -115,8 +115,7 @@ Commands:
   - Backward:       S | DOWN
   - Left:           A | LEFT
   - Right:          D | RIGHT
-  - Head Forwards:  Q
-  - Head Backwards: E
+  - Head Tilt:      Q | E
   - Head Manual:    + | -
 
   - Speed:          o | p -> {self.speeds[0]:.3f}

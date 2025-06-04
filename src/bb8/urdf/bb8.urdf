@@ -61,7 +61,7 @@
     <origin rpy="0 0 0" xyz="0 0 0.165"/>
   </joint>
   <!-- Revolute joint of the sphere: allows pitching only -->
-  <joint name="head_joint" type="revolute">
+  <joint name="servo_joint" type="revolute">
     <parent link="base_link"/>
     <child link="servo_link"/>
     <!-- Offset joint pivot radius above base center -->

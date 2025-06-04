@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Imu - Head1/Status1
       Splitter Ratio: 0.5
     Tree Height: 578
   - Class: rviz/Selection
@@ -95,8 +94,6 @@ Visualization Manager:
       Marker Topic: /head/constraint_list
       Name: MarkerArray - Constraints @C
       Namespaces:
-        Inter constraints, same trajectory: true
-        Inter residuals, same trajectory: true
         Intra constraints: true
         Intra residuals: true
       Queue Size: 100
@@ -299,7 +296,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 16.811565399169922
+      Distance: 16.97968101501465
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -315,9 +312,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5452030301094055
+      Pitch: 0.8002028465270996
       Target Frame: <Fixed Frame>
-      Yaw: 6.12858247756958
+      Yaw: 1.350396752357483
     Saved: ~
 Window Geometry:
   Displays:
