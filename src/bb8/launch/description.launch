@@ -4,6 +4,7 @@
     
     <!-- Publish static joint states (none variable here) -->
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+    <!-- <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" /> -->
 
     <!-- Broadcast TF frames from URDF -->
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />

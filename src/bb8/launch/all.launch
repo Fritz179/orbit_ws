@@ -22,7 +22,7 @@
 
 
         <!-- RPLidar driver -->
-        <node pkg="rplidar_ros" type="rplidarNode" name="rplidar" output="screen">
+        <node pkg="rplidar_ros" type="rplidarNode" name="rplidar" output="screen" respawn="true" respawn_delay="5">
             <param name="serial_port"   value="/dev/ttyUSB0"/>
             <param name="frame_id"      value="laser"/>
             <param name="angle_compensate" value="true"/>
@@ -70,7 +70,7 @@
             <param name="visualize" value="true"/>
         </node>
 
-        <node name="bb8" pkg="bb8" type="bb8" output="screen"/>
+        <!-- <node name="bb8" pkg="bb8" type="bb8" output="screen"/> -->
 
     </group>
 </launch>
