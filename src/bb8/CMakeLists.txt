@@ -41,3 +41,9 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+catkin_install_python(
+    PROGRAMS
+    src/leds.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

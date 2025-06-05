@@ -19,7 +19,7 @@ const int BUTTON_X_INDEX = 2;
 const int BUTTON_Y_INDEX = 3;
 
 const int n_beeps = 7;
-std::string beeps[n_beeps] = {"tones/beep_1.wav", "tones/beep_2.wav", "tones/beep_3.wav", "tones/beep_4.wav", "tones/beep_5.wav", "tones/beep_6.wav", "tones/beep_7.wav"};
+std::string beeps[n_beeps] = {"music/tones/beep_1.wav", "music/tones/beep_2.wav", "music/tones/beep_3.wav", "music/tones/beep_4.wav", "music/tones/beep_5.wav", "music/tones/beep_6.wav", "music/tones/beep_7.wav"};
 
 const int n_songs = 2;
 std::string songs[n_songs] = {"music/black_in_black.wav", "music/dani_california.wav"};
@@ -37,7 +37,15 @@ void system_wrapper(const char* command) {
 void random_sound() { system_wrapper(("aplay -q " + beeps[rand() % n_beeps]).c_str()); }
 void random_song() { system_wrapper(("aplay -q " + songs[rand() % n_songs]).c_str()); }
 void screem() { system_wrapper("aplay -q tones/r2scream.wav"); }
-void standby_noise() { if (rand() % 1000 == 0) random_sound(); }
+void standby_noise() {
+    int r = rand() % 600000;
+    ROS_INFO("Random sound triggered %d", r);
+
+    if (r == 0) {
+        ROS_INFO("Random sound triggered (r == 0)");
+        random_sound();
+    }
+}
 void stop_sound() { system_wrapper("pkill -f aplay"); }
 
 class SimpleButtonDetector {
@@ -114,7 +122,7 @@ void show() {
 void eye(uint8_t color[3]) {
     setPixelColor(0, colour(color[0], color[1], color[2]));
     for (int i = 1; i <= 9; ++i) setPixelColor(i, colour(black[0], black[1], black[2]));
-    for (int i = 10; i <= 20; ++i) setPixelColor(i, colour(color[0], color[1], color[2]));
+    for (int i = 10; i <= 21; ++i) setPixelColor(i, colour(color[0], color[1], color[2]));
     show();
 }
 
