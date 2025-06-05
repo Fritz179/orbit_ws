@@ -1,3 +1,5 @@
 <launch>
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find bb8_remote)/rviz/orbit.rviz" />
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find bb8_remote)/rviz/all.rviz">
+    <remap from="/move_base_simple/goal" to="/remote/goal"/>
+  </node>
 </launch>

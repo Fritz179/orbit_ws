@@ -5,14 +5,21 @@ from pynput.keyboard import Key
 
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Empty
 from std_msgs.msg import Int32
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 
 from cartographer_ros_msgs.srv import GetTrajectoryStates, FinishTrajectory, StartTrajectory
 from cartographer_ros_msgs.msg import TrajectoryStates
 from cartographer_ros_msgs.srv import GetTrajectoryStatesRequest, FinishTrajectoryRequest, StartTrajectoryRequest
 import rospkg
+
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from actionlib_msgs.msg import GoalStatus
+
+def play_wav_nonblocking(path_to_wav):
+    subprocess.Popen(['aplay', path_to_wav])
 
 class Remote:
     def __init__(self):
@@ -28,8 +35,8 @@ class Remote:
         self._enable = False
         self._auto_enabled = False
 
-        f = rospy.get_param('~forward_rate', 4.0)
-        r = rospy.get_param('~rotation_rate', 0.1)
+        f = rospy.get_param('~forward_rate', 2.3)
+        r = rospy.get_param('~rotation_rate', 0.075)
         h = rospy.get_param('~rotation_rate', 0.01)
 
         self.directions = {
@@ -53,7 +60,12 @@ class Remote:
         self._enable_pub = rospy.Publisher("/remote/enable", Bool, queue_size=10)
         self._enable_head_pub = rospy.Publisher("/remote/enable_head", Bool, queue_size=10)
 
+
+        self._start_sound_pub = rospy.Publisher("/play_start_sound", Empty, queue_size=10)
+        self._stop_sound_pub = rospy.Publisher("/play_stop_sound", Empty, queue_size=10)
+
         self._pose_sub = rospy.Subscriber('/initialpose', PoseWithCovarianceStamped, self.pose_callback)
+        self._pose_sub = rospy.Subscriber('/remote/goal', PoseStamped, self.send_goal)
 
         # Wait for the services
         rospy.wait_for_service('/head/get_trajectory_states')
@@ -69,6 +81,43 @@ class Remote:
         self.config_dir = '/home/ros/bb8_ws/src/bb8/config'
         self.config_basename = 'ros_2d_navigation.lua'
 
+        self.append = ""
+        self.counter = 0
+
+        print("A")
+        self.client = actionlib.SimpleActionClient('/head/move_base', MoveBaseAction)
+        self.client.wait_for_server()
+        self.reached = False
+        print("B")
+
+
+    def send_goal(self, pose):
+        goal = MoveBaseGoal()
+        goal.target_pose = pose 
+        self.client.send_goal(goal, done_cb=self.done_cb)
+        self.reached = False
+
+        empty = Empty()
+        self._start_sound_pub.publish(empty)
+
+
+    def done_cb(self, status, result):
+        if status == GoalStatus.SUCCEEDED:
+            rospy.loginfo("Goal reached!")
+        else:
+            rospy.logwarn("Failed to reach goal. Status: %d" % status)
+
+        self.append = "Reached"
+
+        self.reached = True
+        self._command = [0, 0, 0]
+        self._auto_enabled = False
+
+        empty = Empty()
+        self._stop_sound_pub.publish(empty)
+
+
+
     def pose_callback(self, msg):
         rospy.loginfo("Received /initialPose message")
 
@@ -80,7 +129,6 @@ class Remote:
             return
 
         # Step 2: Finish trajectories with state == 0 (active)
-        print(resp)
         for i in range(len(resp.trajectory_states.trajectory_id)):
             if resp.trajectory_states.trajectory_state[i] == TrajectoryStates.ACTIVE:
                 try:
@@ -108,12 +156,28 @@ class Remote:
 
 
     def auto(self, data):
-        if self._auto_enabled:
-            self._command[0] = data.linear.x
-            self._command[1] = data.angular.z
-            self._command[2] = data.angular.y
+        if self._auto_enabled and not self.reached:
+            if data.linear.x > 0.01:
+                self._command[0] = self.speeds[0]
+                self.counter = 0
+            elif data.linear.x < -0.01:
+                self._command[0] = -self.speeds[0]
+                self.counter = 0
+            else:
+                self.counter += 1
+                self._command[0] = 0
 
-        print(data)
+            self._command[1] = data.angular.z / 5
+
+        if not self.reached:
+            self.append = f"Auto(x: {data.linear.x}, z: {data.angular.z}), counter: {self.counter}"
+
+
+        if self.counter > 7:
+            self.client.cancel_all_goals()
+            self.reached = True
+            self.counter = 0
+
 
     def publish(self):
         msg = Twist()
@@ -164,6 +228,8 @@ class Remote:
             self._auto_enabled = False
         elif key == ",":
             self._auto_enabled = True
+        elif key == "y":
+            self.client.cancel_all_goals()
 
 
         if key in self.directions:
@@ -209,6 +275,8 @@ Satus:
   - Head Rotation: {self._command[2]}
   - Head Manual: {self._head}
   - Autonomous: {self._auto_enabled}
+  - Raw commandd: {self.append}
+  - Done?: {self.reached}
 '''
 
 
@@ -220,7 +288,7 @@ def main():
     while not rospy.is_shutdown():
         teleop.publish()
         rate.sleep()
-        # print(teleop)
+        print(teleop)
         teleop._head = 0
 
     return 0
