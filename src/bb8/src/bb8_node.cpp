@@ -8,6 +8,16 @@
 #define LED_PIN 10
 #define DMA 10
 
+void startCallback(const std_msgs::Empty::ConstPtr&) {
+    ROS_INFO("Start sound requested");
+    system_wrapper("aplay -q /home/ros/bb8_ws/music/tones/gogogo.wav");
+}
+
+void stopCallback(const std_msgs::Empty::ConstPtr&) {
+    ROS_INFO("Stop sound requested");
+    system_wrapper("aplay -q /home/ros/bb8_ws/music/tones/wilhelm_scream.wav");
+}
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "node_bb8");
     ros::Time::init();
@@ -45,10 +55,14 @@ int main(int argc, char** argv) {
 
     ros::Rate loop_rate(10);
 
+    ros::NodeHandle nh;
+    ros::Subscriber start_sub = nh.subscribe("/play_start_sound", 10, startCallback);
+    ros::Subscriber stop_sub  = nh.subscribe("/play_stop_sound", 10, stopCallback);
     while (ros::ok()) {
         loop_rate.sleep();
         standby_noise();
         // eye(white);
+        ros::spinOnce();
     }
 
     //ws2811_fini(&ledstring);

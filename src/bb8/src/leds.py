@@ -59,18 +59,20 @@ class DotStarLEDRing:
 
         # LED data for each pixel
         for r, g, b in self.pixels:
-            data.append(self.brightness_byte) # Global brightness header byte
-            data.append(b & 0xFF)             # Blue (APA102 typically expects BGR order)
-            data.append(g & 0xFF)             # Green
-            data.append(r & 0xFF)             # Red
+            data.append(self.brightness_byte)
+            data.append(b & 0xFF)
+            data.append(g & 0xFF)
+            data.append(r & 0xFF)
 
-        # End frame (at least (NUM_LEDS / 2) ones, often 4 bytes of 0xFF for robustness)
-        data.extend([0xFF, 0xFF, 0xFF, 0xFF])
+        # Correct End frame (at least NUM_LEDS / 2 bits = NUM_LEDS // 16 bytes of 0xFF)
+        end_frame_bytes = (NUM_LEDS + 15) // 16
+        data.extend([0xFF] * end_frame_bytes)
 
         # Send data over SPI
         bytes_sent = self.pi.spi_write(self.spi_handle, data)
         if bytes_sent < 0:
             rospy.logwarn(f"SPI write failed with error code: {bytes_sent}")
+
 
     def test_pattern_rainbow_chase(self, cycles=3):
         """Runs a chasing rainbow pattern."""
@@ -126,13 +128,18 @@ class DotStarLEDRing:
     def cleanup(self):
         """Turns off LEDs and closes pigpio connection on node shutdown."""
         rospy.loginfo("Shutting down DotStar LED Ring Tester.")
-        self.set_all((0, 0, 0)) # Ensure LEDs are off
-        # Close SPI device
-        if self.spi_handle >= 0:
-            self.pi.spi_close(self.spi_handle)
-        # Disconnect from pigpiod daemon
-        self.pi.stop()
-        rospy.loginfo("LEDs off and pigpio connection closed.")
+        try:
+            if self.pi is not None and self.pi.connected:
+                self.set_all((0, 0, 0))  # Ensure LEDs are off
+                if self.spi_handle >= 0:
+                    self.pi.spi_close(self.spi_handle)
+                self.pi.stop()
+                rospy.loginfo("LEDs off and pigpio connection closed.")
+            else:
+                rospy.logwarn("pigpio connection was already closed or unavailable.")
+        except Exception as e:
+            rospy.logerr(f"Error during cleanup: {e}")
+
 
 if __name__ == "__main__":
     try:

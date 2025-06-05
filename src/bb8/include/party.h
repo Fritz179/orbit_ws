@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #include <sensor_msgs/Joy.h>
+#include <std_msgs/Empty.h>
 #include <cstdlib>
 
 ws2811_t ledstring = {0};
@@ -99,8 +100,6 @@ uint8_t black[3]   = {0, 0, 0};
 #include <vector>
 #include <iostream>
 #include <ctime>
-
-#include <party.h>
 
 
 int loading_counter = 0;
