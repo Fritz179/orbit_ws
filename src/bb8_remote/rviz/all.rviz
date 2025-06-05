@@ -167,6 +167,10 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        servo_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         sphere_imu:
           Alpha: 1
           Show Axes: false
@@ -270,7 +274,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -289,17 +293,17 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /head/move_base/DWAPlannerROS/local_plan
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map - Global Costmap
       Topic: /head/move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -366,7 +370,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 8.807793617248535
+      Distance: 11.312249183654785
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -374,17 +378,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.6218297481536865
-        Y: 0.1477525532245636
-        Z: -0.4528692662715912
+        X: 1.2265208959579468
+        Y: 0.3052568733692169
+        Z: -1.7935413122177124
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3097965717315674
+      Pitch: 1.454796552658081
       Target Frame: <Fixed Frame>
-      Yaw: 5.3735857009887695
+      Yaw: 6.1285881996154785
     Saved: ~
 Window Geometry:
   Displays:

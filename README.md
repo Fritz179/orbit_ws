@@ -626,3 +626,34 @@ x11vnc -display :0 \
        x11vnc -display :0 -auth /run/user/130/gdm/Xauthority  -rfbauth ~/.vnc/passwd -forever -shared -noxdamage -xkb
 
 respawn-pane -k
+
+rosservice call /head/finish_trajectory "trajectory_id: 0"
+rosservice call /head/write_state "filename: '/home/ros/bb8_ws/src/bb8/maps/last.pbstream'
+
+rosservice call /head/get_trajectory_states "{}" 
+rosservice call /head/finish_trajectory "trajectory_id: 1"
+
+rosservice call /head/start_trajectory "configuration_directory: '$(rospack find bb8)/config'
+configuration_basename: 'ros_2d_navigation.lua'
+use_initial_pose: false
+initial_pose:
+  position: {x: 5.0, y: 0.0, z: 0.0}
+  orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1}
+relative_to_trajectory_id: 0" 
+
+
+rosrun cartographer_ros start_trajectory_main  \
+--configuration_directory $(rospack find bb8)/config  \
+--configuration_basename ros_2d_navigation.lua \
+--initial_pose="0,0,0,0" --relative_to_trajectory_id=0
+
+rostopic echo /initalPose
+
+
+rosservice call /head/start_trajectory "configuration_directory: '$(rospack find bb8)/config'
+configuration_basename: 'ros_2d_navigation.lua'
+use_initial_pose: true 
+initial_pose:
+  position: {x: -5.0, y: 0, z: 0.0}
+  orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1}
+relative_to_trajectory_id: 0" 
