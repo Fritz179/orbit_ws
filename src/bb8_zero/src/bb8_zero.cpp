@@ -62,15 +62,15 @@ NodeZero::NodeZero(int pi, int handle) :
 
     // Send the first setpoint.
     ros::Rate loop_rate(1);
-    while (m_pid_heading_setpoint_pub.getNumSubscribers() == 0 || m_pid_pitch_setpoint_pub.getNumSubscribers() == 0) {
-        ROS_INFO("Waiting for subscribers to %s...", m_pid_heading_setpoint_pub.getTopic().c_str());
+    // while (m_pid_heading_setpoint_pub.getNumSubscribers() == 0 && m_pid_pitch_setpoint_pub.getNumSubscribers() == 0) {
+    //     ROS_INFO("Waiting for subscribers to %s...", m_pid_heading_setpoint_pub.getTopic().c_str());
         
-        if (!ros::ok()) {
-            return;
-        }
+    //     if (!ros::ok()) {
+    //         return;
+    //     }
 
-        loop_rate.sleep();
-    }
+    //     loop_rate.sleep();
+    // }
 
     loop_rate.sleep();
 
@@ -81,8 +81,9 @@ NodeZero::NodeZero(int pi, int handle) :
 }
 
 void NodeZero::print_state(const ros::TimerEvent&) {
-    ROS_INFO("En %d, Head %d, Motor speed: %d, l: %d, r: %d. Servo: %d. Yaw %f, Head pitch vel: %f", 
-        m_enabled, m_head_enabled, m_speed, m_speed_left, m_speed_right, m_head.desired_steps, m_odom.pose.pose.orientation.z, m_pitch_vel);
+    ROS_INFO("En %d, Head %d, Motor speed: %d, l: %d, r: %d. Servo: %d. Yaw %f, Head pitch vel: %f, l: %d, r: %d", 
+        m_enabled, m_head_enabled, m_speed, m_speed_left, m_speed_right, m_head.desired_steps, 
+        m_odom.pose.pose.orientation.z, m_pitch_vel, gpio_read(m_PI, m_head.ls_right), gpio_read(m_PI, m_head.ls_left));
 }
 
 void NodeZero::head_imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {

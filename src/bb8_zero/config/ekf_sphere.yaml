@@ -6,7 +6,7 @@ map_frame:      map
 odom_frame:     odom
 base_link_frame: base_footprint
 world_frame:    odom          # publish the odom→base_link transform
-publish_tf:     true
+publish_tf:     false
 publish_acceleration: true    # enable /accel/filtered stream
 
 ## ----------  Sphere IMU  ----------

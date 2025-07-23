@@ -626,3 +626,5 @@ x11vnc -display :0 \
        x11vnc -display :0 -auth /run/user/130/gdm/Xauthority  -rfbauth ~/.vnc/passwd -forever -shared -noxdamage -xkb
 
 respawn-pane -k
+
+Last working zero: 5cadd6cb721fc0674dec310c199945fb4bae6949
