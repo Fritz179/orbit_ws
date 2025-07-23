@@ -657,3 +657,21 @@ initial_pose:
   position: {x: -5.0, y: 0, z: 0.0}
   orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1}
 relative_to_trajectory_id: 0" 
+
+
+
+
+# Time NTP
+```
+sudo timedatectl set-ntp true
+sudo nano /etc/systemd/timesyncd.conf
+
+[Time]
+NTP=time.google.com time.cloudflare.com
+
+sudo systemctl restart systemd-timesyncd
+timedatectl status
+```
+you should see `System clock synchronized: yes` and the correct time.
+
+
