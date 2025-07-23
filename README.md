@@ -674,7 +674,8 @@ timedatectl status
 ```
 you should see `System clock synchronized: yes` and the correct time.
 
-
+# Docker
+```
 sudo snap install docker
 
 sudo docker pull ros:noetic-ros-base
@@ -686,3 +687,14 @@ sudo docker run --rm -it \
   -v $HOME/orbit_ws:/root/orbit_ws \
   -v $HOME/.ssh:/root/.ssh:ro \
   ros:noetic-ros-base bash
+```
+
+# Hotspot
+```
+nmcli con modify Hotspot \
+  ipv4.method shared \
+  ipv4.addresses 10.99.0.1/24 \
+  ipv4.never-default yes \
+  ipv4.route-metric 600 \
+  ipv6.method ignore
+```
