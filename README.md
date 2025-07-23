@@ -675,3 +675,14 @@ timedatectl status
 you should see `System clock synchronized: yes` and the correct time.
 
 
+sudo snap install docker
+
+sudo docker pull ros:noetic-ros-base
+
+sudo docker run --rm -it \
+  --net=host \
+  --privileged \
+  -v /dev:/dev \
+  -v $HOME/orbit_ws:/root/orbit_ws \
+  -v $HOME/.ssh:/root/.ssh:ro \
+  ros:noetic-ros-base bash
