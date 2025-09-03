@@ -75,4 +75,22 @@
     <node name="bb8_zero" pkg="bb8_zero" type="bb8_zero" output="screen"/>
 
 </group>
+
+    <arg name="joy_dev" default="/dev/input/js0"/>
+  
+  <include file="$(find bb8_zero)/launch/description.launch">s</include>
+
+    <group ns="remote">
+
+    <!-- Joystick driver -->
+    <node pkg="joy" type="joy_node" name="joy_node" output="screen">
+        <param name="dev" value="$(arg joy_dev)"/>
+        <param name="deadzone" value="0.05"/>
+        <param name="autorepeat_rate" value="20"/>
+    </node>
+
+    <!-- Remote handler -->
+    <node name="orbit_remote" pkg="bb8_zero" type="orbit_remote.py" output="screen" />
+    </group>
+
 </launch>
