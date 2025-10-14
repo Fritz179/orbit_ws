@@ -1,0 +1,28 @@
+[Unit]
+Description=FFmpeg: H264 pipe -> RTSP (rtsp://127.0.0.1:8554/pose)
+Requires=mediamtx.service
+After=mediamtx.service
+
+[Service]
+Type=simple
+# Create a clean runtime dir at boot: /run/rtsp-pipe
+RuntimeDirectory=rtsp-pipe
+
+# Ensure the FIFO exists with open perms so writer/reader can attach
+ExecStartPre=/usr/bin/rm -f /run/rtsp-pipe/cam.h264
+ExecStartPre=/usr/bin/mkfifo -m 0666 /run/rtsp-pipe/cam.h264
+
+# Your exact FFmpeg pipeline
+ExecStart=/usr/bin/ffmpeg -fflags nobuffer+genpts -flags low_delay -use_wallclock_as_timestamps 1 \
+  -r 30 -f h264 -i /run/rtsp-pipe/cam.h264 \
+  -c:v libx264 -preset veryfast -tune zerolatency \
+  -pix_fmt yuv420p -profile:v baseline -g 30 -bf 0 -fps_mode cfr \
+  -x264-params repeat-headers=1:bframes=0:rc-lookahead=0:ref=1:keyint=30:min-keyint=30:scenecut=0:nal-hrd=cbr \
+  -b:v 3M -maxrate 3M -bufsize 6M -an \
+  -rtsp_transport tcp -f rtsp rtsp://127.0.0.1:8554/pose
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

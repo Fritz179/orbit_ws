@@ -1,0 +1,17 @@
+# RTSP ingest stays the same
+rtsp: yes
+rtspAddress: :8554
+
+# Serve browsers via WebRTC on :8080
+webrtc: yes
+webrtcAddress: :8080
+webrtcEncryption: no
+
+# Optionally also enable HLS on a different port (8081 here)
+hls: yes
+hlsAddress: :8081
+hlsEncryption: no
+
+paths:
+  pose:
+    source: publisher
