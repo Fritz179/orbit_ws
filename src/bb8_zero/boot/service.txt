@@ -1,0 +1,30 @@
+sudo tee /etc/systemd/system/orbit.service >/dev/null <<'EOF'
+[Unit]
+Description=ORBIT (bb8_zero) ROS launch
+Wants=network-online.target bluetooth.service
+After=network-online.target bluetooth.service
+
+# Remove start-rate limiting so it will keep retrying
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=ros
+Group=ros
+WorkingDirectory=/home/ros
+Environment=ROS_LOG_DIR=/home/ros/.ros/log
+ExecStart=/usr/local/bin/start_orbit.sh
+
+# Auto-retry if roslaunch exits with non-zero (crash/failure)
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+StandardOutput=journal
+StandardError=journal
+# If you use pigpio, also add:
+# Requires=pigpiod.service
+# After=pigpiod.service
+
+[Install]
+WantedBy=multi-user.target
+EOF

@@ -1,0 +1,26 @@
+sudo tee /usr/local/bin/start_orbit.sh >/dev/null <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Environment ---
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_LOG_DIR=/home/ros/.ros/log
+
+# Source ROS and your workspace
+source /opt/ros/noetic/setup.bash
+source /home/ros/bb8_ws/devel/setup.bash
+
+# --- Optional waits for hardware (avoid crashing at boot) ---
+# Wait up to ~30s for I2C and joystick to appear (adjust as needed)
+for dev in /dev/i2c-1 /dev/input/js0; do
+  for i in {1..30}; do
+    [ -e "$dev" ] && break || sleep 1
+  done
+done
+
+# If you rely on pigpio daemon, start/ensure it here:
+# command -v pigpiod >/dev/null && sudo pigpiod || true
+
+# Launch your stack
+exec roslaunch bb8_zero zero.launch
+EOF

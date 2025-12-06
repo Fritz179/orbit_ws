@@ -78,7 +78,7 @@
 
     <arg name="joy_dev" default="/dev/input/js0"/>
   
-  <include file="$(find bb8_zero)/launch/description.launch">s</include>
+  <include file="$(find bb8_zero)/launch/description.launch"></include>
 
     <group ns="remote">
 

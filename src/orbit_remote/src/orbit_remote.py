@@ -4,11 +4,58 @@ from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool, Int32, Empty
 
+import spidev, time
+
+SYM0 = 0b1000        # WS ‘0’  → 1000
+SYM1 = 0b1110        # WS ‘1’  → 1110
+
+def expand_byte(b: int) -> bytes:
+    out = 0
+    for _ in range(8):
+        out = (out << 4) | (SYM1 if b & 0x80 else SYM0)
+        b <<= 1
+    return out.to_bytes(4, "big")
+
+def wheel(pos: int):
+    if pos < 85:   return pos*3, 255-pos*3, 0
+    if pos < 170:  pos -= 85; return 255-pos*3, 0, pos*3
+    pos -= 170;    return 0, pos*3, 255-pos*3
+
+class LEDCyclerSPI:
+    def __init__(self):
+        self.n      = rospy.get_param("~count",   94)
+        bus         = rospy.get_param("~bus",      0)
+        dev         = rospy.get_param("~device",   0)
+        hz          = rospy.get_param("~hz", 2400000)
+        self.delay  = rospy.get_param("~delay", 0.02)
+        self.step   = rospy.get_param("~step",  10)
+
+        self.spi = spidev.SpiDev(bus, dev)
+        self.spi.max_speed_hz = hz
+
+        self.phase = 0
+        self.timer = rospy.Timer(rospy.Duration(self.delay), self.update)
+
+    def send(self, colors):
+        buf = bytearray()
+        for r, g, b in colors:          # WS order = G R B
+            for ch in (g, r, b):
+                buf += expand_byte(ch)
+        self.spi.xfer3(buf)
+
+    def update(self, _):
+        frame = [wheel((i*256//self.n + self.phase) & 255)
+                 for i in range(self.n)]
+        self.send(frame)
+        self.phase = (self.phase + self.step) & 255
+
+
+
 class Remote:
     def __init__(self):
         # Params
-        self.f = rospy.get_param('~forward_rate', 0.7)
-        self.r = rospy.get_param('~rotation_rate', 0.4)
+        self.f = rospy.get_param('~forward_rate', 3.5)
+        self.r = rospy.get_param('~rotation_rate', 0.5)
         self.h = rospy.get_param('~head_rate', 10)
 
         # PS5 mapping (adjust if needed)
@@ -24,6 +71,7 @@ class Remote:
 
         self._enable = False
         self._enable_head = False
+        self._head_manual = 0
 
         # pubs
         self.pub_cmd = rospy.Publisher("/remote/cmd_vel", Twist, queue_size=10)
@@ -42,11 +90,11 @@ class Remote:
         self._enable = bool(msg.buttons[self.BTN_ENABLE])
         self._enable_head = bool(msg.buttons[self.BTN_HEAD_ENABLE])
 
-        # if msg.axes[self.BTN_SPEED]:
-        #     self.f += msg.axes[self.BTN_SPEED] / 100
+        if msg.axes[self.BTN_SPEED]:
+            self.f += msg.axes[self.BTN_SPEED] / 100
 
-        # if msg.axes[self.BTN_ROTATIO_SPEED]:
-        #     self.r += msg.axes[self.BTN_ROTATIO_SPEED] / -500
+        if msg.axes[self.BTN_ROTATIO_SPEED]:
+            self.r += msg.axes[self.BTN_ROTATIO_SPEED] / -500
 
         if msg.buttons[self.BTN_HEAD_UP]:
             self._head_manual = 10
@@ -76,6 +124,7 @@ class Remote:
 def main():
     rospy.init_node("orbit_remote")
     Remote()
+    LEDCyclerSPI()
     rospy.spin()
 
 if __name__ == "__main__":
