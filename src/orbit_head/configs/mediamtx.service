@@ -1,0 +1,14 @@
+[Unit]
+Description=MediaMTX RTSP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/mediamtx /etc/mediamtx/mediamtx.yml
+Restart=on-failure
+RestartSec=2
+# If you run MediaMTX as non-root, set User=mediamtx (or another user) and make sure ports/paths permit it.
+
+[Install]
+WantedBy=multi-user.target

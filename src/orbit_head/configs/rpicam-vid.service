@@ -1,0 +1,21 @@
+[Unit]
+Description=Raspberry Pi Camera (Hailo pose) -> H264 pipe
+Requires=cam-ffmpeg.service
+After=cam-ffmpeg.service
+
+[Service]
+Type=simple
+Environment=QT_QPA_PLATFORM=offscreen
+# If you don’t run as root, ensure the user is in 'video' group for camera access.
+# User=pi
+ExecStart=/usr/bin/rpicam-vid -t 0 -n \
+  --post-process-file /usr/share/rpi-camera-assets/hailo_pose_inf_fl.json \
+  --width 1280 --height 720 --framerate 30 \
+  --codec h264 --inline --intra 30 \
+  -o /run/rtsp-pipe/cam.h264
+
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
