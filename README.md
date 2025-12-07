@@ -627,7 +627,6 @@ x11vnc -display :0 \
 
 respawn-pane -k
 
-<<<<<<< HEAD
 rosservice call /head/finish_trajectory "trajectory_id: 0"
 rosservice call /head/write_state "filename: '/home/ros/bb8_ws/src/bb8/maps/last.pbstream'
 
@@ -699,6 +698,12 @@ nmcli con modify Hotspot \
   ipv4.route-metric 600 \
   ipv6.method ignore
 ```
-=======
-Last working zero: 5cadd6cb721fc0674dec310c199945fb4bae6949
->>>>>>> zeri
+
+# Sphere
+`ssh ros@zero.local`
+
+and
+
+`/home/ros/bb8_ws/src/bb8_zero/src/orbit_remote.py`
+`systemctl status orbit.service `
+`systemctl restart orbit.service `

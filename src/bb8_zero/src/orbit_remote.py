@@ -7,9 +7,11 @@ from std_msgs.msg import Bool, Int32, Empty
 class Remote:
     def __init__(self):
         # Params
-        self.f = rospy.get_param('~forward_rate', 0.7)
+        self.f = rospy.get_param('~forward_rate', 0.6)
         self.r = rospy.get_param('~rotation_rate', 0.4)
-        self.h = rospy.get_param('~head_rate', 10)
+        self.h = rospy.get_param('~head_rate', 4)
+
+        self.curr_linear = 0.0
 
         # PS5 mapping (adjust if needed)
         self.AXIS_LX = rospy.get_param('~axis_angular', 0)   # left stick horiz
@@ -62,12 +64,15 @@ class Remote:
         if not self._enable and was_enabled:
             self.pub_stop_sound.publish(Empty())
 
+        desired = msg.axes[self.AXIS_LY] * self.f
+        self.curr_linear = self.curr_linear * 0.92 + desired * 0.08
+
         # Axes -> Twist
         cmd = Twist()
-        cmd.linear.x  = msg.axes[self.AXIS_LY] * self.f      # invert up/down if needed
+        cmd.linear.x  = self.curr_linear      # invert up/down if needed
         cmd.angular.z = msg.axes[self.AXIS_LX] * self.r
-        print(cmd, self._enable)
-        print(f"Speed: {self.f}, Rotation: {self.r}")
+        # print(cmd, self._enable)
+        # print(f"Speed: {self.f}, Rotation: {self.r}")
 
         self.pub_cmd.publish(cmd)
         self.pub_enable.publish(Bool(self._enable))

@@ -76,7 +76,6 @@ void NodeZero::head_imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
     m_pid_pitch.pub_state(roll);
 }
 
-
 void NodeZero::enable_callback(const std_msgs::Bool::ConstPtr& msg) {
     m_enabled = msg->data;
 
